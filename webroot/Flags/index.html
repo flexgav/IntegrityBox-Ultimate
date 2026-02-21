@@ -208,8 +208,9 @@ body{
   <div class="row"><div class="left"><span class="material-icons icon">bug_report</span><div class="label">Spoof Debug Fingerprint</div></div><label class="switch"><input type="checkbox" id="nodebug"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons icon">pest_control</span><div class="label">Spoof Debug Build</div></div><label class="switch"><input type="checkbox" id="build"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons icon">verified</span><div class="label">Spoof Build Tag</div></div><label class="switch"><input type="checkbox" id="tag"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">healing</span><div class="label">Clear LSposed Prop</div></div><label class="switch"><input type="checkbox" id="lsposed"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons icon">lock</span><div class="label">Spoof Encryption</div></div><label class="switch"><input type="checkbox" id="encrypt"><span class="slider"><span class="knob"></span></span></label></div>
-  <div class="row"><div class="left"><span class="material-icons icon">healing</span><div class="label">Spoof Custom Recovery</div></div><label class="switch"><input type="checkbox" id="twrp"><span class="slider"><span class="knob"></span></span></label></div>
+  <div class="row"><div class="left"><span class="material-icons icon">restore</span><div class="label">Spoof Custom Recovery</div></div><label class="switch"><input type="checkbox" id="twrp"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons icon">delete</span><div class="label">Nuke Gapp Logs</div></div><label class="switch"><input type="checkbox" id="gapps"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons icon">delete</span><div class="label">Nuke Module Logs</div></div><label class="switch"><input type="checkbox" id="root"><span class="slider"><span class="knob"></span></span></label></div>
   <div class="row"><div class="left"><span class="material-icons icon">download</span><div class="label">Integrity Downloader</div></div><label class="switch"><input type="checkbox" id="download"><span class="slider"><span class="knob"></span></span></label></div>
@@ -222,7 +223,7 @@ body{
 
 <script>
 const DIR="/data/adb/Box-Brain";
-const FILES=["noredirect","safemode","NoLineageProp","gapps","override","ota","hma","download","root","nodebug","encrypt","twrp","build","tag"];
+const FILES=["noredirect","safemode","NoLineageProp","gapps","override","ota","hma","download","root","nodebug","encrypt","lsposed","twrp","build","tag"];
 const els=Object.fromEntries(FILES.map(f=>[f,document.getElementById(f)]));
 
 const messages={
@@ -232,6 +233,7 @@ const messages={
   safemode:{on:"Reboot to apply changes",off:"Only enable when something went wrong"},
   twrp:{on:"Reboot to apply changes",off:"Disabled"},
   encrypt:{on:"Fake storage encryption applied",off:"Disabled"},
+  lsposed:{on:"Now click on the action button",off:"Disabled"},
   nodebug:{on:"Reboot to apply changes",off:"Disabled"},
   build:{on:"Reboot to apply changes",off:"Disabled"},
   tag:{on:"Reboot to apply changes",off:"Disabled"},

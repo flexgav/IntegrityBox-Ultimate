@@ -20,7 +20,7 @@ UPDATE="$SCRIPT_DIR/key.sh"
 PROP="$MODPATH/module.prop"
 BAK="$PROP.bak"
 
-URL="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/keybox-status.md"
+URL="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/keybox/key-status"
 INSTALLATION="/data/adb/modules_update/playintegrityfix/webroot/common_scripts/key.sh"
 
 FLAG="$BOX/advanced"
@@ -142,10 +142,10 @@ if [ -f $BOX/download ]; then
         print_row "Thor Installer" "$(get_size "$OUT/Installation_Spoofer.apk")" "Verified" ||
         print_row "Thor Installer" "-" "Failed"
         
-#    download "$URL_AF" "Android_Faker.apk" "$SUM_AF"
-#    [ -f "$OUT/Android_Faker.apk" ] &&
-#        print_row "Android Faker" "$(get_size "$OUT/Android_Faker.apk")" "Verified" ||
-#        print_row "Android Faker" "-" "Failed"
+    download "$URL_AF" "Android_Faker.apk" "$SUM_AF"
+    [ -f "$OUT/Android_Faker.apk" ] &&
+        print_row "Android Faker" "$(get_size "$OUT/Android_Faker.apk")" "Verified" ||
+        print_row "Android Faker" "-" "Failed"
 
     printf "%${WIDTH}s\n" | tr ' ' '='
     center "DONE"
@@ -193,6 +193,17 @@ if [ -f "$BOX/hma" ]; then
   handle_delay
   exit 0
 fi
+
+[ -f $BOX/lsposed ] && { 
+  echo "[*] Starting cleanup..."; 
+  if getprop | grep -q "^\[dalvik.vm.dex2oat-flags\]"; then 
+    echo "[*] Removing dalvik.vm.dex2oat-flags..."; 
+    resetprop -p dalvik.vm.dex2oat-flags && echo "[✓] Property removed." || echo "[!] Failed to remove property."; 
+  fi; 
+  rm -f $BOX/lsposed && echo "[✓] Cleanup complete."; 
+  echo "[*] Done. Exiting."; 
+  exit 0; 
+}
 
 if [ -f "$BOX/gapps" ]; then
   rm -f "$BOX/gapps"
@@ -514,5 +525,6 @@ log_step "STOPPED" "Droidguard Processes"
 sh "$SCRIPT_DIR/cleanup.sh" >/dev/null 2>&1; 
 echo " "
 echo " "
+echo "    ACTION COMPLETED SUCCESSFULLY"
 handle_delay
 exit 0
