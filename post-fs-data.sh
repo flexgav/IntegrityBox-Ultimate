@@ -12,20 +12,28 @@ if [ -f "/data/adb/modules/playintegrityfix/customize.sh" ]; then
   rm -rf "/data/adb/modules/playintegrityfix/customize.sh"
 fi
 
-if [ -f "/data/adb/Box-Brain/disablegms" ]; then
-    set_resetprop persist.sys.pihooks.disable.gms_key_attestation_block true
-    set_resetprop persist.sys.pihooks.disable.gms_props true
-    set_simpleprop persist.sys.pixelprops.vending false
-    set_simpleprop persist.sys.pihooks.disable 1
-    set_simpleprop persist.sys.kihooks.disable 1
+# Handle Vending-specific prop
+if [ -f "/data/adb/Box-Brain/enablevending" ]; then
+    set_simpleprop persist.sys.pixelprops.vending true
 fi
 
+if [ -f "/data/adb/Box-Brain/disablevending" ]; then
+    set_simpleprop persist.sys.pixelprops.vending false
+fi
+
+# Handle GMS-specific props
 if [ -f "/data/adb/Box-Brain/enablegms" ]; then
     set_resetprop persist.sys.pihooks.disable.gms_key_attestation_block false
     set_resetprop persist.sys.pihooks.disable.gms_props false
-    set_simpleprop persist.sys.pixelprops.vending true
     set_simpleprop persist.sys.pihooks.disable 0
     set_simpleprop persist.sys.kihooks.disable 0
+fi
+
+if [ -f "/data/adb/Box-Brain/disablegms" ]; then
+    set_resetprop persist.sys.pihooks.disable.gms_key_attestation_block true
+    set_resetprop persist.sys.pihooks.disable.gms_props true
+    set_simpleprop persist.sys.pihooks.disable 1
+    set_simpleprop persist.sys.kihooks.disable 1
 fi
 
 if [ ! -f "$placeholder/run_scan.sh" ]; then
@@ -457,6 +465,9 @@ touch "$placeholder/nogms"
 touch "$placeholder/lineage"
 touch "$placeholder/selinux"
 touch "$placeholder/hide"
+touch "$placeholder/resetprop"
+touch "$placeholder/faq"
+touch "$placeholder/nuke"
 touch "$placeholder/zygisknext"
 touch "$placeholder/yesgms"
 
@@ -848,7 +859,7 @@ cat <<'EOF' > "$boot/prop.sh"
 #!/system/bin/sh
 
 # CONFIG
-PATCH_DATE="2026-02-01"
+PATCH_DATE="2026-03-01"
 FILE_PATH="/data/adb/tricky_store/security_patch.txt"
 SKIP_FILE="/data/adb/Box-Brain/skip"
 LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
