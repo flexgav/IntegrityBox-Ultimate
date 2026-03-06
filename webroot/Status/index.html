@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Play Integrity Manager</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e1020;
+            --surface: #1b1e33;
+            --surface-elevated: #252a4d;
+            --text-primary: #e9ecff;
+            --text-secondary: #9aa3ff;
+            --text-tertiary: #6b75cc;
+            --separator: #ffffff14;
+            --accent: #4da3ff;
+            --accent-light: rgba(77, 163, 255, 0.15);
+            --success: #4dff88;
+            --success-light: rgba(77, 255, 136, 0.15);
+            --warning: #ffaa4d;
+            --warning-light: rgba(255, 170, 77, 0.15);
+            --danger: #ff4d4d;
+            --danger-light: rgba(255, 77, 77, 0.15);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background: #0e1020;
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 12px 4px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--accent), #0051d5);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(77, 163, 255, 0.3);
+        }
+        
+        .brand-icon span { color: white; font-size: 24px; }
+
+        .brand-text h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+        
+        .brand-text p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--surface);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: 1px solid var(--separator);
+        }
+
+        .status-indicator {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            position: relative;
+        }
+        
+        .status-indicator.offline { background: var(--danger); }
+        
+        .status-indicator::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 24px 0 12px 0;
+            padding: 0 4px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title span {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .info-btn {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--separator);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .info-btn:hover { background: var(--surface-elevated); color: var(--text-primary); }
+        .info-btn:active { transform: scale(0.9); }
+
+        .ios-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 16px;
+            border: 1px solid var(--separator);
+            box-shadow: 0 20px 60px #00000088;
+            transition: transform 0.2s;
+        }
+        
+        .ios-card:active { transform: scale(0.98); }
+
+        .verdict-list {
+            padding: 8px 0;
+        }
+
+        .verdict-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            position: relative;
+            transition: background 0.2s;
+        }
+        
+        .verdict-item:active { background: rgba(255,255,255,0.05); }
+
+        .verdict-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 64px; right: 0; bottom: 0;
+            height: 1px;
+            background: var(--separator);
+        }
+
+        .verdict-icon-wrap {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+
+        .verdict-item.pass .verdict-icon-wrap { background: var(--success-light); color: var(--success); }
+        .verdict-item.fail .verdict-icon-wrap { background: var(--danger-light); color: var(--danger); }
+        .verdict-item.warn .verdict-icon-wrap { background: var(--warning-light); color: var(--warning); }
+        .verdict-item.loading .verdict-icon-wrap { background: rgba(255,255,255,0.1); color: var(--text-tertiary); }
+
+        .verdict-content {
+            flex: 1;
+        }
+
+        .verdict-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .verdict-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .verdict-status-pill {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .verdict-item.pass .verdict-status-pill { background: var(--success-light); color: var(--success); }
+        .verdict-item.fail .verdict-status-pill { background: var(--danger-light); color: var(--danger); }
+        .verdict-item.warn .verdict-status-pill { background: var(--warning-light); color: var(--warning); }
+        .verdict-item.loading .verdict-status-pill { background: rgba(255,255,255,0.1); color: var(--text-tertiary); }
+
+        .identity-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            background: var(--separator);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--separator);
+        }
+
+        .identity-item {
+            background: var(--surface);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+        
+        .identity-item:active { background: var(--surface-elevated); }
+
+        .identity-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .identity-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .identity-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .identity-value.mono {
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 4px;
+        }
+
+        .validity-section {
+            margin: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(77, 163, 255, 0.1) 0%, rgba(77, 163, 255, 0.05) 100%);
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(77, 163, 255, 0.2);
+        }
+
+        .validity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .validity-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .validity-days {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .validity-days.critical { color: var(--danger); }
+        .validity-days.warning { color: var(--warning); }
+
+        .progress-container {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+            background: var(--accent);
+        }
+        
+        .progress-bar.critical { background: var(--danger); }
+        .progress-bar.warning { background: var(--warning); }
+
+        .validity-dates {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .validity-dates span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 0 16px 16px 16px;
+        }
+
+        .stat-pill {
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--radius-sm);
+            padding: 12px 8px;
+            text-align: center;
+            transition: transform 0.2s;
+            border: 1px solid var(--separator);
+        }
+        
+        .stat-pill:active { transform: scale(0.95); }
+
+        .stat-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+
+        .tee-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--separator);
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px #00000088;
+        }
+
+        .tee-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: transparent;
+            transition: background 0.3s;
+        }
+
+        .tee-card.healthy::before { background: var(--success); box-shadow: 0 0 20px var(--success); }
+        .tee-card.broken::before { 
+            background: var(--danger); 
+            box-shadow: 0 0 20px var(--danger);
+            animation: danger-pulse 2s infinite;
+        }
+
+        @keyframes danger-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .tee-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .tee-card.healthy .tee-icon { 
+            background: var(--success-light); 
+            color: var(--success); 
+        }
+        
+        .tee-card.broken .tee-icon { 
+            background: var(--danger-light); 
+            color: var(--danger); 
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+
+        .tee-card.broken .tee-icon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 16px;
+            border: 2px solid var(--danger);
+            opacity: 0;
+            animation: ripple-tee 2s infinite;
+        }
+
+        @keyframes ripple-tee {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        .tee-content { flex: 1; }
+        .tee-title { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+        .tee-card.healthy .tee-title { color: var(--success); }
+        .tee-card.broken .tee-title { color: var(--danger); }
+        .tee-desc { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .tee-badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            animation: fade-in 0.3s ease;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tee-card.healthy .tee-badge { background: var(--success-light); color: var(--success); }
+        .tee-card.broken .tee-badge { 
+            background: var(--danger-light); 
+            color: var(--danger);
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 77, 77, 0); }
+        }
+
+        .activity-list {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--separator);
+            box-shadow: 0 20px 60px #00000088;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            position: relative;
+        }
+
+        .activity-item:not(:last-child) {
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .activity-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .activity-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .activity-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .activity-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .activity-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .activity-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px 32px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50px;
+            color: #0e1020;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 24px rgba(77, 163, 255, 0.4);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .refresh-btn:hover { 
+            transform: translateX(-50%) translateY(-2px); 
+            box-shadow: 0 8px 32px rgba(77, 163, 255, 0.5); 
+        }
+        
+        .refresh-btn:active { transform: translateX(-50%) scale(0.96); }
+        .refresh-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: translateX(-50%); }
+
+        .refresh-btn .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(14, 16, 32, 0.3);
+            border-top-color: #0e1020;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .offline-banner {
+            background: var(--danger-light);
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            color: var(--danger);
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(14, 16, 32, 0.7);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            padding: 24px;
+            width: 100%;
+            max-width: 480px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 80vh;
+            overflow-y: auto;
+            border-top: 1px solid var(--separator);
+            box-shadow: 0 20px 60px #00000088;
+        }
+        
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-handle {
+            width: 36px; height: 5px;
+            background: var(--separator);
+            border-radius: 3px;
+            margin: 0 auto 20px auto;
+        }
+
+        .modal-title { 
+            font-size: 1.3rem; 
+            font-weight: 700; 
+            margin-bottom: 16px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        
+        .modal-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        .modal-text strong { color: var(--text-primary); font-weight: 600; }
+        
+        .modal-text code {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .modal-close {
+            margin-top: 24px;
+            width: 100%;
+            padding: 16px;
+            background: var(--surface-elevated);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-md);
+            color: var(--accent);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .modal-close:active { background: var(--separator); }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <div class="brand-icon">
+                    <span class="material-icons-round">security</span>
+                </div>
+                <div class="brand-text">
+                    <h1>Play Integrity Manager</h1>
+                    <p>Powered By IntegrityBox</p>
+                </div>
+            </div>
+            <div class="status-badge">
+                <div class="status-indicator" id="netStatusDot"></div>
+                <span id="netStatusText">Checking</span>
+            </div>
+        </header>
+
+        <div class="offline-banner" id="offlineBanner">
+            <span class="material-icons-round" style="font-size: 20px;">wifi_off</span>
+            <span>Internet unavailable. Keybox status cannot be verified.</span>
+        </div>
+
+        <div class="section-header hidden" id="verdictSectionHeader">
+            <div class="section-title">
+                <span class="material-icons-round">verified</span>
+                Integrity Status
+            </div>
+            <button class="info-btn" onclick="showInfo('verdicts')">
+                <span class="material-icons-round" style="font-size: 18px;">info</span>
+            </button>
+        </div>
+
+        <div class="ios-card hidden" id="keyboxPanel">
+            <div class="verdict-list" id="verdictList">
+                <div class="verdict-item loading" id="vStrong">
+                    <div class="verdict-icon-wrap">
+                        <span class="material-icons-round">shield</span>
+                    </div>
+                    <div class="verdict-content">
+                        <div class="verdict-name">Strong Integrity</div>
+                        <div class="verdict-desc">Hardware attestation</div>
+                    </div>
+                    <div class="verdict-status-pill">...</div>
+                </div>
+                <div class="verdict-item loading" id="vDevice">
+                    <div class="verdict-icon-wrap">
+                        <span class="material-icons-round">smartphone</span>
+                    </div>
+                    <div class="verdict-content">
+                        <div class="verdict-name">Device Integrity</div>
+                        <div class="verdict-desc">Play Protect certified</div>
+                    </div>
+                    <div class="verdict-status-pill">...</div>
+                </div>
+                <div class="verdict-item loading" id="vBasic">
+                    <div class="verdict-icon-wrap">
+                        <span class="material-icons-round">lock</span>
+                    </div>
+                    <div class="verdict-content">
+                        <div class="verdict-name">Basic Integrity</div>
+                        <div class="verdict-desc">System compatibility</div>
+                    </div>
+                    <div class="verdict-status-pill">...</div>
+                </div>
+            </div>
+            <div style="padding: 12px 20px; background: rgba(255,255,255,0.03); border-top: 1px solid var(--separator);">
+                <div style="font-size: 0.8rem; color: var(--text-tertiary); display: flex; align-items: center; gap: 6px;">
+                    <span class="material-icons-round" style="font-size: 14px;">update</span>
+                    <span id="keyboxUpdated">Waiting for sync...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">
+                <span class="material-icons-round">fingerprint</span>
+                Device Identity
+            </div>
+            <button class="info-btn" onclick="showInfo('fingerprint')">
+                <span class="material-icons-round" style="font-size: 18px;">info</span>
+            </button>
+        </div>
+
+        <div class="identity-grid" id="fpPanel">
+            <div class="identity-item">
+                <div class="identity-label">Manufacturer</div>
+                <div class="identity-value" id="fpManufacturer">-</div>
+            </div>
+            <div class="identity-item">
+                <div class="identity-label">Model</div>
+                <div class="identity-value" id="fpModel">-</div>
+            </div>
+            <div class="identity-item">
+                <div class="identity-label">Device</div>
+                <div class="identity-value" id="fpDevice">-</div>
+            </div>
+            <div class="identity-item">
+                <div class="identity-label">Release</div>
+                <div class="identity-value" id="fpRelease">-</div>
+            </div>
+            <div class="identity-item full-width">
+                <div class="identity-label">Fingerprint</div>
+                <div class="identity-value mono" id="fpFingerprint">-</div>
+            </div>
+            <div class="identity-item">
+                <div class="identity-label">Security Patch</div>
+                <div class="identity-value" id="fpSecurityPatch">-</div>
+            </div>
+            <div class="identity-item">
+                <div class="identity-label">SDK Level</div>
+                <div class="identity-value" id="fpSdk">-</div>
+            </div>
+        </div>
+
+        <div class="ios-card" style="margin-top: 16px;">
+            <div class="validity-section" id="validitySection">
+                <div class="validity-header">
+                    <div>
+                        <div class="validity-title">Validity Period</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;" id="validityRange">-</div>
+                    </div>
+                    <div class="validity-days" id="expiryDays">-</div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="expiryBar" style="width: 0%;"></div>
+                </div>
+                <div class="validity-dates">
+                    <span>
+                        <span class="material-icons-round" style="font-size: 14px;">calendar_today</span>
+                        <span id="fpCreated">Created: -</span>
+                    </span>
+                    <span>
+                        <span class="material-icons-round" style="font-size: 14px;">edit</span>
+                        <span id="fpModified">Modified: -</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-pill">
+                    <div class="stat-value" id="daysLeft">-</div>
+                    <div class="stat-label">Days Left</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="stat-value"><span class="badge badge-success" id="selinuxStatus">-</span></div>
+                    <div class="stat-label">SELinux</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="stat-value" id="playStoreVer" style="font-size: 0.8rem;">-</div>
+                    <div class="stat-label">Play Store</div>
+                </div>
+                <div class="stat-pill">
+                    <div class="stat-value" id="playServicesVer" style="font-size: 0.8rem;">-</div>
+                    <div class="stat-label">Play Services</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tee-card hidden" id="teePanel">
+            <div class="tee-icon">
+                <span class="material-icons-round">memory</span>
+            </div>
+            <div class="tee-content">
+                <div class="tee-title" id="teeTitle">Checking...</div>
+                <div class="tee-desc" id="teeDesc">Trusted Execution Environment</div>
+            </div>
+            <div class="tee-badge" id="teeBadge">...</div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">
+                <span class="material-icons-round">schedule</span>
+                Activity Log
+            </div>
+        </div>
+
+        <div class="activity-list">
+            <div class="activity-item">
+                <div class="activity-left">
+                    <div class="activity-icon">
+                        <span class="material-icons-round">cloud_sync</span>
+                    </div>
+                    <div class="activity-info">
+                        <div class="activity-label">Keybox Sync</div>
+                        <div class="activity-sub">Last server check</div>
+                    </div>
+                </div>
+                <div class="activity-value" id="lastKeyboxSync">-</div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-left">
+                    <div class="activity-icon">
+                        <span class="material-icons-round">fingerprint</span>
+                    </div>
+                    <div class="activity-info">
+                        <div class="activity-label">Fingerprint Read</div>
+                        <div class="activity-sub">PIF configuration</div>
+                    </div>
+                </div>
+                <div class="activity-value" id="lastFpRead">-</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" id="refreshBtn" onclick="init()">
+        <span class="material-icons-round">sync</span>
+        <span id="refreshText">Refresh</span>
+    </button>
+
+    <div class="modal-overlay" id="infoModal" onclick="hideModalOnBackdrop(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div class="modal-title" id="modalTitle">Information</div>
+            <div class="modal-text" id="modalText"></div>
+            <button class="modal-close" onclick="hideModal()">Done</button>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            keyboxUrl: 'https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/keybox/key-status',
+            fingerprintPath: '/data/adb/modules/playintegrityfix/custom.pif.prop',
+            teePath: '/data/adb/tricky_store/tee_status',
+            keyboxLocalPath: '/data/adb/modules/integrity-box/keybox/keybox.xml'
+        };
+
+        const infoTexts = {
+            verdicts: `<strong>Play Integrity Verdicts</strong><br><br>
+                Google Play Integrity API provides three levels of device verification:<br><br>
+                <strong>Strong Integrity</strong> - Device has hardware-backed security and passes cryptographic attestation.<br><br>
+                <strong>Device Integrity</strong> - Device is Play Protect certified but may not pass hardware/RKP attestation.<br><br>
+                <strong>Basic Integrity</strong> - Device passes basic system checks (bootloader is locked/spoofed).`,
+            fingerprint: `<strong>Device Fingerprint</strong><br><br>
+                Spoofs your device identity to match a certified device profile.<br><br>
+                <strong>Validity Period</strong> - Estimated expiry calculated from their canary release dates. Once expired, integrity checks will fail.<br><br>
+                Location: <code>$MODDIR/custom.pif.prop</code>`
+        };
+
+        async function exec(cmd) {
+            return new Promise((resolve, reject) => {
+                if (window.parent && window.parent.runShellFromIframe) {
+                    window.parent.runShellFromIframe(cmd).then(resolve).catch(reject);
+                    return;
+                }
+                if (typeof ksu !== 'undefined' && ksu.exec) {
+                    const cb = 'cb_' + Date.now();
+                    window[cb] = (code, stdout, stderr) => {
+                        delete window[cb];
+                        code === 0 ? resolve(stdout.trim()) : reject(stderr || stdout);
+                    };
+                    ksu.exec(cmd, '{}', cb);
+                } else {
+                    reject(new Error('KSU API not available'));
+                }
+            });
+        }
+
+        async function checkInternet() {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 3000);
+                await fetch('https://www.google.com/favicon.ico', { 
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        async function fetchKeyboxStatus() {
+            const response = await fetch(CONFIG.keyboxUrl, { cache: 'no-store' });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const text = await response.text();
+            if (text.includes('🟢🟢🟢')) return 'STRONG';
+            if (text.includes('🟢🟢🔴')) return 'DEVICE';
+            if (text.includes('🔴🔴🔴')) return 'BANNED';
+            return 'UNKNOWN';
+        }
+
+        async function getFileStats(path) {
+            try {
+                const result = await exec(`stat -c '%Y %W %y' "${path}" 2>/dev/null || echo "0 0 0"`);
+                const parts = result.split(' ');
+                if (parts.length >= 3 && parts[0] !== '0') {
+                    const modified = parseInt(parts[0]) * 1000;
+                    const created = parts[1] !== '0' ? parseInt(parts[1]) * 1000 : modified;
+                    return { modified, created };
+                }
+            } catch (e) {
+                console.log('File stats error:', e);
+            }
+            return null;
+        }
+
+        async function parseFingerprint() {
+            try {
+                const content = await exec(`cat "${CONFIG.fingerprintPath}" 2>/dev/null || echo ""`);
+                if (!content) return null;
+
+                const lines = content.split('\n');
+                const data = {};
+
+                lines.forEach(line => {
+                    if (line.includes('=') && !line.startsWith('#')) {
+                        const [key, ...valParts] = line.split('=');
+                        if (key && valParts.length > 0) {
+                            data[key.trim()] = valParts.join('=').trim();
+                        }
+                    }
+                    if (line.includes('Released On')) {
+                        const match = line.match(/Released On:\s*(\d{4}-\d{2}-\d{2})/);
+                        if (match) data.releasedOn = match[1];
+                    }
+                    if (line.includes('Estimated Expiry')) {
+                        const match = line.match(/Estimated Expiry:\s*(\d{4}-\d{2}-\d{2})/);
+                        if (match) data.estimatedExpiry = match[1];
+                    }
+                });
+
+                const stats = await getFileStats(CONFIG.fingerprintPath);
+                if (stats) {
+                    data.fileCreated = stats.created;
+                    data.fileModified = stats.modified;
+                }
+
+                return data;
+            } catch (e) {
+                console.error('Fingerprint parse error:', e);
+                return null;
+            }
+        }
+
+        async function parseTEE() {
+            try {
+                const content = await exec(`cat "${CONFIG.teePath}" 2>/dev/null || echo ""`);
+                if (!content) return null;
+                return {
+                    broken: content.includes('teeBroken=true'),
+                    content: content
+                };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function getPlayStoreVersion() {
+            try {
+                return await exec("dumpsys package com.android.vending | grep versionName | head -n1 | awk -F'=' '{print $2}' | cut -d'-' -f1 | cut -d' ' -f1");
+            } catch (e) {
+                return 'Unknown';
+            }
+        }
+
+        async function getPlayServicesVersion() {
+            try {
+                return await exec("dumpsys package com.google.android.gms | grep versionName | head -n1 | awk -F'=' '{print $2}' | cut -d'-' -f1 | cut -d' ' -f1");
+            } catch (e) {
+                return 'Unknown';
+            }
+        }
+
+        async function getSELinuxStatus() {
+            try {
+                return await exec("getenforce");
+            } catch (e) {
+                return 'Unknown';
+            }
+        }
+
+        function formatDateShort(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function formatDateFull(date) {
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function updateVerdicts(status) {
+            const items = [
+                { id: 'vStrong', name: 'Strong', desc: 'Hardware attestation' },
+                { id: 'vDevice', name: 'Device', desc: 'Play Protect certified' },
+                { id: 'vBasic', name: 'Basic', desc: 'System compatibility' }
+            ];
+
+            const stateMap = {
+                'STRONG': ['pass', 'pass', 'pass'],
+                'DEVICE': ['fail', 'pass', 'pass'],
+                'BASIC': ['fail', 'fail', 'pass'],
+                'BANNED': ['fail', 'fail', 'fail'],
+                'UNKNOWN': ['fail', 'fail', 'fail']
+            };
+
+            const statusMap = {
+                'pass': 'Pass',
+                'fail': 'Failed',
+                'warn': 'Limited'
+            };
+
+            const states_arr = stateMap[status] || stateMap['UNKNOWN'];
+
+            items.forEach((item, i) => {
+                const el = document.getElementById(item.id);
+                const state = states_arr[i];
+                el.className = 'verdict-item ' + state;
+                el.querySelector('.verdict-status-pill').textContent = statusMap[state] || 'Unknown';
+            });
+        }
+
+        function updateFingerprint(fp) {
+            if (!fp) return;
+
+            document.getElementById('fpManufacturer').textContent = fp.MANUFACTURER || '-';
+            document.getElementById('fpModel').textContent = fp.MODEL || '-';
+            document.getElementById('fpDevice').textContent = fp.DEVICE || '-';
+            document.getElementById('fpRelease').textContent = fp.RELEASE || '-';
+            document.getElementById('fpFingerprint').textContent = fp.FINGERPRINT || '-';
+            document.getElementById('fpSecurityPatch').textContent = fp.SECURITY_PATCH || '-';
+            document.getElementById('fpSdk').textContent = fp.DEVICE_INITIAL_SDK_INT || fp['*.api_level'] || '-';
+
+            const expiry = fp.estimatedExpiry || '2026-03-26';
+            const released = fp.releasedOn || '2026-02-12';
+            const today = new Date();
+            const expiryDate = new Date(expiry);
+            const releasedDate = new Date(released);
+
+            const totalDays = Math.ceil((expiryDate - releasedDate) / (1000 * 60 * 60 * 24));
+            const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+            const percent = Math.max(0, Math.min(100, (daysLeft / totalDays) * 100));
+
+            const daysEl = document.getElementById('expiryDays');
+            daysEl.textContent = daysLeft > 0 ? daysLeft + 'd' : 'EXP';
+            daysEl.className = 'validity-days ' + (daysLeft < 7 ? 'critical' : daysLeft < 14 ? 'warning' : '');
+
+            const bar = document.getElementById('expiryBar');
+            bar.style.width = percent + '%';
+            bar.className = 'progress-bar ' + (daysLeft < 7 ? 'critical' : daysLeft < 14 ? 'warning' : '');
+
+            document.getElementById('validityRange').textContent = formatDateShort(releasedDate) + ' - ' + formatDateShort(expiryDate);
+
+            if (fp.fileCreated) {
+                document.getElementById('fpCreated').textContent = formatDateFull(new Date(fp.fileCreated));
+            } else if (fp.releasedOn) {
+                document.getElementById('fpCreated').textContent = formatDateFull(new Date(fp.releasedOn));
+            }
+
+            if (fp.fileModified) {
+                const modDate = new Date(fp.fileModified);
+                document.getElementById('fpModified').textContent = formatDateFull(modDate);
+                document.getElementById('lastFpRead').textContent = modDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+
+            document.getElementById('daysLeft').textContent = daysLeft > 0 ? daysLeft : '0';
+        }
+
+        function updateTEE(tee) {
+            if (!tee) {
+                document.getElementById('teePanel').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('teePanel').classList.remove('hidden');
+            const panel = document.getElementById('teePanel');
+            const title = document.getElementById('teeTitle');
+            const desc = document.getElementById('teeDesc');
+            const badge = document.getElementById('teeBadge');
+
+            if (tee.broken) {
+                panel.className = 'tee-card broken';
+                title.textContent = 'TEE Broken';
+                desc.textContent = 'TrickyStore fallback applied';
+                badge.textContent = 'Compromised';
+            } else {
+                panel.className = 'tee-card healthy';
+                title.textContent = 'TEE Healthy';
+                desc.textContent = 'Environment secure';
+                badge.textContent = 'Secure';
+            }
+        }
+
+        async function updateSystemInfo() {
+            const selinux = await getSELinuxStatus();
+            const selBadge = document.getElementById('selinuxStatus');
+            selBadge.textContent = selinux === 'Enforcing' ? 'OK' : 'OFF';
+            selBadge.className = 'badge ' + (selinux === 'Enforcing' ? 'badge-success' : 'badge-warning');
+
+            document.getElementById('playStoreVer').textContent = await getPlayStoreVersion();
+            document.getElementById('playServicesVer').textContent = await getPlayServicesVersion();
+        }
+
+        async function init() {
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div><span>Loading...</span>';
+
+            const hasInternet = await checkInternet();
+
+            if (hasInternet) {
+                document.getElementById('netStatusDot').className = 'status-indicator';
+                document.getElementById('netStatusText').textContent = 'Online';
+                document.getElementById('offlineBanner').style.display = 'none';
+                document.getElementById('keyboxPanel').classList.remove('hidden');
+                document.getElementById('verdictSectionHeader').classList.remove('hidden');
+
+                try {
+                    const keyboxStatus = await fetchKeyboxStatus();
+                    updateVerdicts(keyboxStatus);
+                    document.getElementById('lastKeyboxSync').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                    const keyboxStats = await getFileStats(CONFIG.keyboxLocalPath);
+                    if (keyboxStats) {
+                        document.getElementById('keyboxUpdated').textContent = 'Updated ' + formatDateShort(new Date(keyboxStats.modified));
+                    } else {
+                        document.getElementById('keyboxUpdated').textContent = 'Updated ' + formatDateShort(new Date());
+                    }
+                } catch (e) {
+                    updateVerdicts('UNKNOWN');
+                    document.getElementById('keyboxUpdated').textContent = 'Sync failed';
+                }
+            } else {
+                document.getElementById('netStatusDot').className = 'status-indicator offline';
+                document.getElementById('netStatusText').textContent = 'Offline';
+                document.getElementById('offlineBanner').style.display = 'flex';
+                document.getElementById('keyboxPanel').classList.add('hidden');
+                document.getElementById('verdictSectionHeader').classList.add('hidden');
+            }
+
+            const fp = await parseFingerprint();
+            if (fp) updateFingerprint(fp);
+
+            const tee = await parseTEE();
+            updateTEE(tee);
+
+            await updateSystemInfo();
+
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-icons-round">sync</span><span>Refresh</span>';
+        }
+
+        function showInfo(type) {
+            document.getElementById('modalTitle').textContent = type === 'verdicts' ? 'Integrity Verdicts' : 'Device Fingerprint';
+            document.getElementById('modalText').innerHTML = infoTexts[type];
+            document.getElementById('infoModal').classList.add('active');
+        }
+
+        function hideModal() {
+            document.getElementById('infoModal').classList.remove('active');
+        }
+
+        function hideModalOnBackdrop(event) {
+            if (event.target === event.currentTarget) hideModal();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
