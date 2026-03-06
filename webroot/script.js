@@ -37,8 +37,13 @@ const messageMap = {
   "support":       { start: "Become a Supporter", type: "info" },
   "report":       { start: "What's wrong buddy?", type: "info" },
   "assistant":       { start: "Let me guide you to the right path", type: "info" },
+  "status":       { start: "Informs you about keybox & fingerprint validity", type: "info" },
   "hma.sh":       { success: "Done ✅", type: "info" },
   "ulock":      { success: "Done", type: "info" },
+  "faq":      { start: "Coming Soon", type: "info" },
+  "nuke":      { start: "Coming Soon", type: "info" },
+  "utility":      { success: "These doesn't require reboot", type: "info" },
+  "spoofing":      { start: "These are for custom ROM users", type: "info" },
   "hash":     { start: "Paste your boot hash buddy", success: "Boot hash operation complete", type: "success" }
 };
 
@@ -224,11 +229,11 @@ async function updateDashboard() {
     "status-playstore": "dumpsys package com.android.vending | grep versionName | head -n1 | awk -F'=' '{print $2}' | cut -d'-' -f1 | cut -d' ' -f1 | cut -d'.' -f1-3",
     "status-selinux": "getenforce || echo Unknown",
     "status-target": "[ -f /data/adb/tricky_store/target.txt ] && grep -cve '^$' /data/adb/tricky_store/target.txt || echo 0",
-    "status-android": "case \"$(getprop ro.system.build.version.release 2>/dev/null)\" in 4*) echo KitKat ;; 5*) echo Lollipop ;; 6*) echo Marshmallow ;; 7*) echo Nougat ;; 8*) echo Oreo ;; 9*) echo Pie ;; 10) echo QuinceTart ;; 11) echo RedVelvet ;; 12*) echo SnowCone ;; 13*) echo Tiramisu ;; 14*) echo UpsideDown ;; 15*) echo VanillaIceCream ;; 16*) echo Baklava ;; *) echo Unknown ;; esac",
+    "status-android": "case \"$(getprop ro.system.build.version.release 2>/dev/null)\" in 4*) echo KitKat ;; 5*) echo Lollipop ;; 6*) echo Marshmallow ;; 7*) echo Nougat ;; 8*) echo Oreo ;; 9*) echo Pie ;; 10) echo QuinceTart ;; 11) echo RedVelvet ;; 12*) echo SnowCone ;; 13*) echo Tiramisu ;; 14*) echo UpsideDown ;; 15*) echo Vanilla🍦 ;; 16*) echo Baklava ;; *) echo Unknown ;; esac",
     "status-pixel": "[ -f /data/adb/modules/playintegrityfix/custom.pif.prop ] && awk -F= '/^PRODUCT=/{print $2}' /data/adb/modules/playintegrityfix/custom.pif.prop || echo None",
     "status-patch": "getprop ro.build.version.security_patch || echo Unknown",
     "status-zygisk": "[ -f /data/adb/modules/zygisksu/module.prop ] && awk -F= '/^name=/{print $2}' /data/adb/modules/zygisksu/module.prop || ([ -f /data/adb/modules/rezygisk/module.prop ] && echo ReZygisk) || (magisk --sqlite \"SELECT value FROM settings WHERE key='zygisk';\" | grep -q '1' && echo Magisk-Zygisk) || echo None",
-    "status-profile": "if [ -f /data/adb/Box-Brain/advanced ]; then echo 'Supreme'; elif [ -f /data/adb/Box-Brain/legacy ]; then echo 'Legacy'; elif [ -f /data/adb/Box-Brain/wipe ]; then echo 'Meta'; else echo 'None'; fi",
+    "status-profile": "if [ -f /data/adb/Box-Brain/advanced ]; then echo 'Supreme'; elif [ -f /data/adb/Box-Brain/pixelify ]; then echo 'Pixelify'; elif [ -f /data/adb/Box-Brain/legacy ]; then echo 'Legacy'; elif [ -f /data/adb/Box-Brain/wipe ]; then echo 'Meta'; else echo 'None'; fi",
 
     "status-whitelist": `
       # whitelist ALWAYS has priority
@@ -341,7 +346,7 @@ async function updateDashboard() {
             el.className = "status-indicator neutral";
           } else {
             el.textContent = "Disabled";
-            el.className = "status-indicator aqua";
+            el.className = "status-indicator neutral";
           }
           break;
 
@@ -399,8 +404,8 @@ btns.forEach(btn=>{
         return;
       }
 
-      if (["scanner","hash","user","flags","cache","piffork","pif","vending",
-           "support","report","profile","assistant","tee","xml","hide","patch","ctrl"].includes(type)) {
+      if (["scanner","hash","user","flags","cache","nuke","piffork","pif","vending",
+           "support","report","profile","assistant","utility","faq","spoofing","status","tee","xml","hide","patch","ctrl"].includes(type)) {
 
         const pathMap = {
           scanner:"./Risky/index.html",
@@ -417,8 +422,13 @@ btns.forEach(btn=>{
           xml:"./KeyboxLoader/index.html",
           hide:"./HideMyFiles/index.html",
           patch:"./Patch/index.html",
+          status:"./Status/index.html",
           profile:"./Profile/index.html",
           assistant:"./Assistant/index.html",
+          utility:"./Utility/index.html",
+          faq:"./Faq/index.html",
+          nuke:"./Nuke/index.html",
+          spoofing:"./Spoofing/index.html",
           tee:"./TEEsimulator/index.html"
         };
 
