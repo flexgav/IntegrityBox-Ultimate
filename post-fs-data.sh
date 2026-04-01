@@ -7,6 +7,11 @@ placeholder="/data/adb/modules/playintegrityfix/webroot/common_scripts"
 mkdir -p "/data/adb/Box-Brain/Integrity-Box-Logs"
 mkdir -p "$boot"
 
+# Grant perms 
+if [ -f "$placeholder/autopilot.sh" ]; then
+    chmod 755 "$placeholder/autopilot.sh"
+fi
+
 # Remove installation script if exists 
 if [ -f "/data/adb/modules/playintegrityfix/customize.sh" ]; then
   rm -rf "/data/adb/modules/playintegrityfix/customize.sh"
@@ -35,6 +40,103 @@ if [ -f "/data/adb/Box-Brain/disablegms" ]; then
     set_simpleprop persist.sys.pihooks.disable 1
     set_simpleprop persist.sys.kihooks.disable 1
 fi
+
+if [ ! -f "$placeholder/target.sh" ]; then
+  cat <<'EOF' > "$placeholder/target.sh"
+#!/system/bin/sh
+MODPATH="/data/adb/modules/playintegrityfix"
+. $MODPATH/common_func.sh
+
+TARGET_DIR="/data/adb/tricky_store"
+TARGET="$TARGET_DIR/target.txt"
+BACKUP="$TARGET.bak"
+TMP="${TARGET}.new.$$"
+success=0
+made_backup=0
+orig_selinux="$(getenforce 2>/dev/null || echo Permissive)"
+
+mkdir -p "$TARGET_DIR" 2>/dev/null
+if [ ! -f "$SKIP_FILE" ] && [ "$orig_selinux" = "Enforcing" ]; then
+    setenforce 0
+fi
+
+[ -f "$TARGET" ] && mv -f "$TARGET" "$BACKUP" && made_backup=1 && log_step "BACKUP" "$BACKUP"
+
+teeBroken="false"
+TEE_STATUS="$TARGET_DIR/tee_status"
+[ -f "$TEE_STATUS" ] && [ "$(grep -E '^teeBroken=' "$TEE_STATUS" | cut -d '=' -f2)" = "true" ] && teeBroken="true"
+
+for pkg in com.android.vending com.google.android.gms com.google.android.gsf; do
+    echo "$pkg" >> "$TMP"
+done
+
+cmd package list packages -3 2>/dev/null | cut -d ":" -f2 | while read -r pkg; do
+    [ -z "$pkg" ] && continue
+    grep -Fxq "$pkg" "$TMP" || echo "$pkg" >> "$TMP"
+done
+
+sed -i 's/^[[:space:]]*//;s/[[:space:]]*$//' "$TMP"
+sort -u "$TMP" -o "$TMP"
+
+BLACKLIST="/data/adb/Box-Brain/blacklist.txt"
+if [ -s "$BLACKLIST" ]; then
+    sed -i 's/^[[:space:]]*//;s/[[:space:]]*$//' "$BLACKLIST"
+    grep -Fvxf "$BLACKLIST" "$TMP" > "${TMP}.filtered" || true
+    mv -f "${TMP}.filtered" "$TMP"
+    log_step "CLEANED" "Blacklisted Apps removed"
+else
+    log_step "SKIPPED" "Blacklist not configured"
+fi
+
+[ "$teeBroken" = "true" ] && sed -i 's/$/!/' "$TMP" && log_step "SUPPORT" "TEE Broken detected"
+
+mv -f "$TMP" "$TARGET" && success=1 && log_step "UPDATED" "Target Packages updated"
+
+if [ ! -f "$SKIP_FILE" ] && [ "$orig_selinux" = "Enforcing" ]; then
+    setenforce 1
+fi
+exit 0
+EOF
+fi
+
+chmod 755 "$placeholder/target.sh"
+
+if [ ! -f "$placeholder/gms.sh" ]; then
+  cat <<'EOF' > "$placeholder/gms.sh"
+#!/system/bin/sh
+MODPATH="/data/adb/modules/playintegrityfix"
+. $MODPATH/common_func.sh
+
+for proc in com.google.android.gms.unstable com.google.android.gms com.android.vending; do
+  kill_process "$proc"
+done
+
+exit 0
+EOF
+fi
+
+chmod 755 "$placeholder/gms.sh"
+
+if [ ! -f "$placeholder/webui.sh" ]; then
+  cat <<'EOF' > "$placeholder/webui.sh"
+#!/system/bin/sh
+
+if pm list packages | grep -q "io.github.a13e300.ksuwebui"; then
+   am start -n "io.github.a13e300.ksuwebui/.WebUIActivity" -e id "playintegrityfix"
+   exit 0
+fi
+
+if pm list packages | grep -q "com.dergoogler.mmrl.webuix"; then
+   am start -n "com.dergoogler.mmrl.webuix/.ui.activity.webui.WebUIActivity" -e MOD_ID "playintegrityfix"
+   exit 0
+fi
+
+am start -a android.intent.action.VIEW -d "https://github.com/5ec1cff/KsuWebUIStandalone/releases"
+exit 0
+EOF
+fi
+
+chmod 755 "$placeholder/webui.sh"
 
 if [ ! -f "$placeholder/run_scan.sh" ]; then
   cat <<'EOF' > "$placeholder/run_scan.sh"
@@ -196,6 +298,7 @@ if [ -f "$PIF_FILE" ]; then
       $1=="spoofProvider" ||
       $1=="spoofSignature" ||
       $1=="spoofVendingFinger" ||
+      $1=="spoofPixel" ||
       $1=="spoofVendingSdk" {
 
         if (!first) printf ",\n"
@@ -328,6 +431,7 @@ SERVICE_FILES="
 /data/adb/service.d/prop.sh
 /data/adb/service.d/hash.sh
 /data/adb/service.d/lineage.sh
+/data/adb/service.d/package.sh
 "
 
 # Check if the prop file exists and contains the required line
@@ -474,7 +578,6 @@ touch "$placeholder/yesgms"
 cat <<'EOF' > "$placeholder/hma.sh"
 #!/system/bin/sh
 
-# CONFIG
 SRC_CONFIG="/data/adb/modules/playintegrityfix/hidemyapplist/config.json"
 
 APP_PATHS="
@@ -493,10 +596,8 @@ ANTISELINUX="/data/adb/Box-Brain/antiselinux"
 ORIG_SELINUX=""
 SELINUX_CHANGED=0
 PKG_NAME=""
-LAUNCH_CMD=""
 ACTIVITY=""
 
-# INIT
 mkdir -p "$LOG_DIR"
 mkdir -p "$BACKUP_DIR"
 
@@ -527,7 +628,6 @@ restore_selinux() {
 
 log "•••••••••••••= HMA config sync started •••••••••••••"
 
-# SOURCE CHECK
 if [ ! -f "$SRC_CONFIG" ]; then
     log "ERROR: Source config not found: $SRC_CONFIG"
     exit 1
@@ -535,42 +635,65 @@ fi
 
 log "Source config found: $SRC_CONFIG"
 
-# FIND HMA
+HMA_INSTALLED=0
+if pm list packages | grep -q "^package:org.frknkrc44.hma_oss$"; then
+    HMA_INSTALLED=1
+    PKG_NAME="org.frknkrc44.hma_oss"
+    ACTIVITY="org.frknkrc44.hma_oss/.ui.activity.MainActivity"
+elif pm list packages | grep -q "^package:com.google.android.hmal$"; then
+    HMA_INSTALLED=1
+    PKG_NAME="com.google.android.hmal"
+    ACTIVITY="com.google.android.hmal/icu.nullptr.hidemyapplist.ui.activity.MainActivity"
+elif pm list packages | grep -q "^package:com.tsng.hidemyapplist$"; then
+    HMA_INSTALLED=1
+    PKG_NAME="com.tsng.hidemyapplist"
+    ACTIVITY="com.tsng.hidemyapplist/icu.nullptr.hidemyapplist.ui.activity.MainActivity"
+fi
+
+if [ "$HMA_INSTALLED" -eq 0 ]; then
+    log "No supported HMA app installed"
+    log "Opening download page..."
+    nohup am start -a android.intent.action.VIEW -d "https://github.com/frknkrc44/HMA-OSS/releases" > /dev/null 2>&1 &
+    exit 1
+fi
+
+log "Resolved package name: $PKG_NAME"
+
 TARGET_APP=""
 for APP in $APP_PATHS; do
     if [ -d "$APP" ]; then
         TARGET_APP="$APP"
-
-        case "$APP" in
-            "/data/user/0/org.frknkrc44.hma_oss")
-                PKG_NAME="org.frknkrc44.hma_oss"
-                ACTIVITY="org.frknkrc44.hma_oss/.ui.activity.MainActivity"
-                ;;
-            "/data/user/0/com.google.android.hmal")
-                PKG_NAME="com.google.android.hmal"
-                ACTIVITY="com.google.android.hmal/icu.nullptr.hidemyapplist.ui.activity.MainActivity"
-                ;;
-            "/data/user/0/com.tsng.hidemyapplist")
-                PKG_NAME="com.tsng.hidemyapplist"
-                ACTIVITY="com.tsng.hidemyapplist/icu.nullptr.hidemyapplist.ui.activity.MainActivity"
-                ;;
-        esac
         log "Found installed app data path: $APP"
-        log "Resolved package name: $PKG_NAME"
         break
     fi
 done
 
 if [ -z "$TARGET_APP" ]; then
-    log "No supported HMA app installed. Nothing to do."
-    log "•••••••••••••= Finished •••••••••••••"
-    exit 0
+    log "App installed but data directory not found"
+    log "Launching app to create data directory..."
+    log "Launching activity: $ACTIVITY"
+    am start --user 0 -a android.intent.action.VIEW -n "$ACTIVITY" >>"$LOG_FILE" 2>&1
+    sleep 5
+    am force-stop "$PKG_NAME" >>"$LOG_FILE" 2>&1
+    log "App launched and stopped, checking data directory..."
+    
+    for APP in $APP_PATHS; do
+        if [ -d "$APP" ]; then
+            TARGET_APP="$APP"
+            log "Data directory now available: $APP"
+            break
+        fi
+    done
+    
+    if [ -z "$TARGET_APP" ]; then
+        log "ERROR: Data directory still not created after launch"
+        exit 1
+    fi
 fi
 
 TARGET_FILES="$TARGET_APP/files"
 TARGET_CONFIG="$TARGET_FILES/config.json"
 
-# ENSURE /files EXISTS
 if [ ! -d "$TARGET_FILES" ]; then
     log "/files directory missing, creating: $TARGET_FILES"
     mkdir -p "$TARGET_FILES" || {
@@ -579,7 +702,6 @@ if [ ! -d "$TARGET_FILES" ]; then
     }
 fi
 
-# BACKUP EXISTING CONFIG
 if [ -f "$TARGET_CONFIG" ]; then
     BACKUP_NAME="config_${DATE_TAG}.json"
     log "Existing config found, moving to $BACKUP_DIR/$BACKUP_NAME"
@@ -589,7 +711,6 @@ if [ -f "$TARGET_CONFIG" ]; then
     }
 fi
 
-# COPY NEW CONFIG
 log "Copying new config to $TARGET_CONFIG"
 cp "$SRC_CONFIG" "$TARGET_CONFIG" || {
     log "ERROR: Failed to copy new config"
@@ -599,11 +720,9 @@ cp "$SRC_CONFIG" "$TARGET_CONFIG" || {
 chmod 666 "$TARGET_CONFIG"
 chown system:system "$TARGET_CONFIG" 2>/dev/null
 
-# TEMPORARY SELINUX PERMISSIVE
 if [ ! -f "$ANTISELINUX" ]; then
     ORIG_SELINUX="$(get_selinux_mode)"
     log "Current SELinux mode: $ORIG_SELINUX"
-
     if [ "$ORIG_SELINUX" = "Enforcing" ]; then
         log "Switching SELinux to Permissive temporarily"
         set_selinux_permissive
@@ -614,22 +733,15 @@ else
     log "antiselinux flag found, skipping SELinux mode change"
 fi
 
-# FORCE STOP & RELAUNCH
-if [ -n "$PKG_NAME" ] && [ -n "$ACTIVITY" ]; then
-    log "Force stopping app: $PKG_NAME"
-    am force-stop "$PKG_NAME" >>"$LOG_FILE" 2>&1
-
-    sleep 1
-
-    log "Launching activity: $ACTIVITY"
-    am start --user 0 -a android.intent.action.VIEW -n "$ACTIVITY" \
-        >>"$LOG_FILE" 2>&1
-
-    if [ $? -eq 0 ]; then
-        log "App launched successfully"
-    else
-        log "ERROR: Failed to launch app"
-    fi
+log "Force stopping app: $PKG_NAME"
+am force-stop "$PKG_NAME" >>"$LOG_FILE" 2>&1
+sleep 1
+log "Launching activity: $ACTIVITY"
+am start --user 0 -a android.intent.action.VIEW -n "$ACTIVITY" >>"$LOG_FILE" 2>&1
+if [ $? -eq 0 ]; then
+    log "App launched successfully"
+else
+    log "ERROR: Failed to launch app"
 fi
 
 restore_selinux
@@ -642,12 +754,95 @@ EOF
 
 chmod 777 "$placeholder/hma.sh"
 
+cat <<'EOF' > "$boot/package.sh"
+#!/system/bin/sh
+
+# Check if required module folders exist
+# These modules add system app package names to target.txt which ruins keybox & increases battery drain
+MODULE1="/data/adb/modules/.TA_utl"
+MODULE2="/data/adb/modules/tsupport-advance"
+MODULE3="/data/adb/modules/Yurikey"
+MODULE4="/data/adb/modules/tricky_store/webroot"
+
+if [ ! -d "$MODULE1" ] && [ ! -d "$MODULE2" ] && [ ! -d "$MODULE3" ] && [ ! -d "$MODULE4" ]; then
+    exit 0
+fi
+
+# Paths
+IGNORE_FLAG="/data/adb/Box-Brain/ignore"
+TARGET_FILE="/data/adb/tricky_store/target.txt"
+SCRIPT="/data/adb/modules/playintegrityfix/webroot/common_scripts/target.sh"
+LOG_FILE="/data/adb/Box-Brain/Integrity-Box-Logs/target.log"
+
+# Create log directory if needed
+mkdir -p "$(dirname "$LOG_FILE")"
+
+# Log function
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+}
+
+# Check ignore flag
+if [ -f "$IGNORE_FLAG" ]; then
+    log "Ignore flag found, exiting"
+    exit 0
+fi
+
+# Function to check and execute
+execute_if_needed() {
+    if [ -f "$TARGET_FILE" ]; then
+        line_count=$(wc -l < "$TARGET_FILE")
+        log "Target.txt has $line_count packages"
+        if [ "$line_count" -gt 50 ]; then
+            log "Line count exceeds 50, executing cleanup script"
+            if [ -f "$SCRIPT" ]; then
+                sh "$SCRIPT"
+                log "Script executed with exit code $?"
+            else
+                log "Script not found: $SCRIPT"
+            fi
+        fi
+    else
+        log "Target file not found: $TARGET_FILE"
+    fi
+}
+
+# Initial check
+log "••• Service started •••"
+execute_if_needed
+
+# Monitor in background
+while true; do
+    sleep 30
+    if [ -f "$IGNORE_FLAG" ]; then
+        log "Ignore flag detected during monitoring, stopping"
+        exit 0
+    fi
+    execute_if_needed
+done
+EOF
+
+chmod 777 "$boot/package.sh"
+
 cat <<'EOF' > "$boot/lineage.sh"
 #!/system/bin/sh
 
+MODPATH="/data/adb/modules/playintegrityfix"
+. $MODPATH/common_func.sh
+
+# Module path and file references
+LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
+PROP="/data/adb/modules/playintegrityfix/system.prop"
+
+note() {
+    TS="$(date '+%Y-%m-%d %H:%M:%S')"
+    mkdir -p "$LOG_DIR" 2>/dev/null
+    printf "%s | %s\n" "$TS" "$1" >> "$LOG_DIR/Lineage.log"
+}
+
 # Abort the script & delete flags web safe mode is active 
 if [ -f "/data/adb/Box-Brain/safemode" ]; then
-    echo "$(date '+%Y-%m-%d %H:%M:%S') : Safemode active, script aborted." >> "/data/adb/Box-Brain/Integrity-Box-Logs/safemode.log"
+    note "$(date '+%Y-%m-%d %H:%M:%S') : Safemode active, script aborted." >> "/data/adb/Box-Brain/Integrity-Box-Logs/safemode.log"
     rm -rf "/data/adb/Box-Brain/NoLineageProp"
     rm -rf "/data/adb/Box-Brain/nodebug"
     rm -rf "/data/adb/Box-Brain/tag"
@@ -658,13 +853,6 @@ if [ -f "/data/adb/modules/playintegrityfix/disable" ]; then
     rm -rf "/data/adb/modules/playintegrityfix/system.prop"
     exit 0
 fi
-
-MODPATH="/data/adb/modules/playintegrityfix"
-. $MODPATH/common_func.sh
-
-# Module path and file references
-LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
-PROP="/data/adb/modules/playintegrityfix/system.prop"
 
 # Module install path
 export MODPATH="/data/adb/modules/playintegrityfix"
@@ -684,8 +872,8 @@ FLAGS_ACTIVE=""
 [ -f "$TAG_FLAG" ] && FLAGS_ACTIVE="$FLAGS_ACTIVE tag"
 
 if [ -n "$FLAGS_ACTIVE" ]; then
-    log "Prop sanitization flags active: $FLAGS_ACTIVE"
-    log "Preparing temporary prop file..."
+    note "Prop sanitization flags active: $FLAGS_ACTIVE"
+    note "Preparing temporary prop file..."
     getprop | grep "userdebug" >> "$TMP_PROP"
     getprop | grep "test-keys" >> "$TMP_PROP"
     getprop | grep "lineage_" >> "$TMP_PROP"
@@ -694,12 +882,12 @@ if [ -n "$FLAGS_ACTIVE" ]; then
     sed -i 's///g' "$TMP_PROP"
     sed -i 's/: /=/g' "$TMP_PROP"
 else
-    log "No prop sanitization flags found. Skipping."
+    note "No prop sanitization flags found. Skipping."
 fi
 
 # LineageOS cleanup
 if [ -f "$NO_LINEAGE_FLAG" ]; then
-    log "NoLineageProp flag detected. Deleting LineageOS props..."
+    note "NoLineageProp flag detected. Deleting LineageOS props..."
     for prop in \
         ro.lineage.build.version \
         ro.lineage.build.version.plat.rev \
@@ -712,7 +900,7 @@ if [ -f "$NO_LINEAGE_FLAG" ]; then
         resetprop --delete "$prop"
     done
     sed -i 's/lineage_//g' "$TMP_PROP"
-    log "LineageOS props sanitized."
+    note "LineageOS props sanitized."
 fi
 
 # userdebug to user
@@ -720,7 +908,7 @@ if [ -f "$NODEBUG_FLAG" ]; then
     if grep -q "userdebug" "$TMP_PROP"; then
         sed -i 's/userdebug/user/g' "$TMP_PROP"
     fi
-    log "userdebug to user sanitization applied."
+    note "userdebug to user sanitization applied."
 fi
 
 # test-keys to release-keys
@@ -728,22 +916,22 @@ if [ -f "$TAG_FLAG" ]; then
     if grep -q "test-keys" "$TMP_PROP"; then
         sed -i 's/test-keys/release-keys/g' "$TMP_PROP"
     fi
-    log "test-keys to release-keys sanitization applied."
+    note "test-keys to release-keys sanitization applied."
 fi
 
 # Finalize system.prop
 if [ -s "$TMP_PROP" ]; then
-    log "Sorting and creating final system.prop..."
+    note "Sorting and creating final system.prop..."
     sort -u "$TMP_PROP" > "$SYSTEM_PROP"
     rm -f "$TMP_PROP"
-    log "system.prop created at $SYSTEM_PROP."
+    note "system.prop created at $SYSTEM_PROP."
 
-    log "Waiting 30 seconds before applying props..."
+    note "Waiting 30 seconds before applying props..."
     sleep 30
 
-    log "Applying props via resetprop..."
+    note "Applying props via resetprop..."
     resetprop -n --file "$SYSTEM_PROP"
-    log "Prop sanitization applied from system.prop"
+    note "Prop sanitization applied from system.prop"
 fi
 
 # Explicit fingerprint sanitization
@@ -761,9 +949,9 @@ if [ -f "$NODEBUG_FLAG" ] || [ -f "$TAG_FLAG" ]; then
         resetprop ro.build.fingerprint "$fp_clean"
         [ -f "$NODEBUG_FLAG" ] && resetprop ro.build.type "user"
         [ -f "$TAG_FLAG" ] && resetprop ro.build.tags "release-keys"
-        log "Fingerprint sanitized to $fp_clean"
+        note "Fingerprint sanitized to $fp_clean"
     else
-        log "Fingerprint already clean. No changes applied."
+        note "Fingerprint already clean. No changes applied."
     fi
 fi
 EOF
@@ -859,7 +1047,7 @@ cat <<'EOF' > "$boot/prop.sh"
 #!/system/bin/sh
 
 # CONFIG
-PATCH_DATE="2026-03-01"
+PATCH_DATE="2026-04-01"
 FILE_PATH="/data/adb/tricky_store/security_patch.txt"
 SKIP_FILE="/data/adb/Box-Brain/skip"
 LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
@@ -913,14 +1101,12 @@ writelog "•••••• Starting Security Patch Override ••••••
 mkdir -p "/data/adb/tricky_store"
 echo "all=$PATCH_DATE" > "$FILE_PATH" 2>>"$LOG_FILE"
 
-# APPLY SYSTEM SECURITY PATCH
-setprop_safe ro.build.version.security_patch "$PATCH_DATE"
-
-# APPLY VENDOR SECURITY PATCH
+# APPLY SYSTEM+VENDOR SECURITY PATCH
 if [ -f "$SKIP_FILE" ]; then
     writelog "⚠ Sensitive device detected, skipping ro.vendor.build.security_patch"
 else
     setprop_safe ro.vendor.build.security_patch "$PATCH_DATE"
+    setprop_safe ro.build.version.security_patch "$PATCH_DATE"
 fi
 
 # FINAL VERIFICATION
@@ -931,9 +1117,8 @@ if [ -f "$SKIP_FILE" ]; then
     writelog "⚠ Sensitive device detected, Vendor patch override intentionally skipped"
 else
     writelog "Vendor Patch Applied: $VENDOR_VAL"
+    writelog "System Patch Applied: $BUILD_VAL"
 fi
-
-writelog "System Patch Applied: $BUILD_VAL"
 
 writelog "•••••• Script Finished Successfully ••••••"
 exit 0

@@ -19,40 +19,6 @@ debug() {
     echo "$1" | tee -a "$INSTALL_LOG"
 }
 
-# Module info variables
-MODNAME=$(grep_prop name $TMPDIR/module.prop)
-MODVER=$(grep_prop version $TMPDIR/module.prop)
-AUTHOR=$(grep_prop author $TMPDIR/module.prop)
-TIME=$(date "+%d, %b - %H:%M %Z")
-
-# Gather system information
-BRAND=$(getprop ro.product.brand)
-MODEL=$(getprop ro.product.model)
-DEVICE=$(getprop ro.product.device)
-ANDROID=$(getprop ro.system.build.version.release)
-SDK=$(getprop ro.system.build.version.sdk)
-ARCH=$(getprop ro.product.cpu.abi)
-BUILD_DATE=$(getprop ro.system.build.date)
-ROM_TYPE=$(getprop ro.system.build.type)
-SDK=$(getprop ro.build.version.sdk)
-SE=$(getenforce)
-
-# Display module details
-display_header() {
-    debug
-    debug "========================================="
-    debug "          Module Information     "
-    debug "========================================="
-    debug " ✦ Module Name   : $MODNAME"
-    debug " ✦ Version       : $MODVER"
-    debug " ✦ Author        : $AUTHOR"
-    debug " ✦ Started at    : $TIME"
-    debug "_________________________________________"
-    debug
-    debug
-    debug
-}
-
 # Verify module integrity
 check_integrity() {
     debug "========================================="
@@ -79,7 +45,7 @@ check_integrity() {
 setup_environment() {
     debug " ✦ Setting up Environment "
     chmod +x "$SCRIPT/key.sh"
-    sh "$SCRIPT/key.sh" #> /dev/null 2>&1
+    sh "$SCRIPT/key.sh"
 }
 
 hizru() {
@@ -90,7 +56,7 @@ hizru() {
 
     mkdir -p "$FLAG" "$LOG_DIR"
 
-    PKGS="com.samsung.android.app.updatecenter com.samsung.android.biometrics.app.setting com.samsung.android.game.gos com.oplus.romupdate"
+    PKGS="com.samsung.android.app.updatecenter com.samsung.android.biometrics.app.setting com.samsung.android.game.gos com.oplus.ota com.oplus.romupdate"
     FOUND=0
     TS="$(date '+%Y-%m-%d %H:%M:%S')"
 
@@ -166,24 +132,6 @@ check_boot_hash() {
     fi
 }
 
-# Gather additional system info
-gather_system_info() {
-    debug "========================================="
-    debug "          Gathering System Info "
-    debug "========================================="
-    debug " ✦ Device Brand   : $BRAND"
-    debug " ✦ Device Model   : $MODEL"
-    debug " ✦ Android Version: $ANDROID (SDK $SDK)"
-    debug " ✦ Architecture   : $ARCH"
-    debug " ✦ SELinux Status : $SE"
-    debug " ✦ ROM Type       : $ROM_TYPE"
-    debug " ✦ Build Date     : $BUILD_DATE"
-    debug "_________________________________________"
-    debug
-    debug
-    debug
-}
-
 # Release the source
 release_source() {
     [ -f "/data/adb/Box-Brain/noredirect" ] && return 0
@@ -209,15 +157,13 @@ display_footer() {
     debug "_________________________________________"
     debug
     debug "             Installation Completed "
-    debug "   This module was released by 𝗠𝗘𝗢𝗪 𝗗𝗨𝗠𝗣"
+    debug "    This module was released by 𝗠𝗘𝗢𝗪 𝗗𝗨𝗠𝗣"
     debug
     debug
 }
 
 # Main installation flow
 install_module() {
-    display_header
-    gather_system_info
     check_integrity
     setup_environment
     hizru
@@ -254,7 +200,7 @@ fi
 
 # Quote of the day 
 cat <<EOF > $LOG_DIR/.verify
-TrueStrengthNeedsNoAudience
+GodIsReal
 EOF
 
 # remove old module id to avoid conflict
@@ -275,27 +221,10 @@ if [ ! -f "/data/adb/modules/playintegrityfix/service.sh" ]; then
     fi
 fi
 
-
-
-debug " ✦ Detecting ROM signature"
-# Get the signature of the "android" package
-SIG=$(pm dump android 2>/dev/null | grep -A1 "signatures:" | tail -n1 | tr -d '[:space:]')
-
-case "$SIG" in
-    # Known AOSP test key hex prefixes
-    *30820122300d06092a864886f70d01010105000382010f00*|\
-    *30820122300d06092a864886f70d01010105000382010f01*)
-        touch "$FLAG/test-key"
-        ;;
-    *)
-        touch "$FLAG/release-key"
-        ;;
-esac
-
 # Write security patch file if missing 
 if [ ! -f /data/adb/tricky_store/security_patch.txt ]; then
 cat <<EOF > /data/adb/tricky_store/security_patch.txt
-all=2026-03-01
+all=2026-04-01
 EOF
 fi
 

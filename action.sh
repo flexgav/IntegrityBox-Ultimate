@@ -38,14 +38,14 @@ FILE_PATH="$TARGET_DIR/security_patch.txt"
 DIR="/sdcard/Download"
 OUTJSON="/sdcard/meow.json"
 
-URL_ZN="https://github.com/Dr-TSNG/ZygiskNext/releases/download/v1.3.2/Zygisk-Next-1.3.2-688-2c60cdd-release.zip"
-SUM_ZN="6eedf9401eeb0778febee48f08af8ea517208ceb31f644715e24ca2a57b59425"
+URL_ZN="https://github.com/Dr-TSNG/ZygiskNext/releases/download/v1.3.3/Zygisk-Next-1.3.3-731-1193e46-release.zip"
+SUM_ZN="a528584874dd814423dece1a6bc734aee524886d74f4453f48af0715a7f0f5c4"
 URL_CP="https://github.com/LSPosed/CorePatch/releases/download/4.8/app-release.apk"
 SUM_CP="61db1976f9e47f28700825942cfed0a373cbed9ac0d4006faefd21de34e19fef"
-URL_TH="https://github.com/trinadhthatakula/Thor/releases/download/v1.71.1/foss-release.apk"
-SUM_TH="8d8e74aa9e9d49cf8fc0fc03a5244f9f72b210a1de1cfe0c71bcfd212541b539"
-URL_AF="https://github.com/Android1500/AndroidFaker/releases/download/v2.0.0-beta-9-3/AF-v2.0.0-beta-9-3.apk"
-SUM_AF="7269658249f150b9f177e8d72322fe54f200e408b238e5b245b2f7b0a5a6fd62"
+URL_TH="https://github.com/trinadhthatakula/Thor/releases/download/v1.71.7/foss-release.apk"
+SUM_TH="bb6645e4a434d40eb8e8d54d41a0813f241ea091fc360e6d49835759e9c8c6b8"
+URL_AF="https://github.com/Android1500/AndroidFaker/releases/download/v2.0.0-beta-9-5/AF-v2.0.0-beta-9-5.apk"
+SUM_AF="ec46d481c8f455f36204ffb113dd2623c464dab58d1d2e64e4e42d24fa69d7c8"
 URL_TS="https://github.com/5ec1cff/TrickyStore/releases/download/1.4.1/Tricky-Store-v1.4.1-245-72b2e84-release.zip"
 SUM_TS="2f5e73fcba0e4e43b6e96b38f333cbe394873e3a81cf8fe1b831c2fbd6c46ea9"
 URL_KA="https://github.com/qwq233/KeyAttestation/releases/download/1.8.4/key-attestation-v1.8.4-release.apk"
@@ -53,9 +53,9 @@ SUM_KA="c9bbc118c75b11bfca7d99b67470d68b5505e1959b6a5f0b298b38ba8104c93a"
 URL_UL="https://github.com/Xposed-Modules-Repo/ru.mike.updatelocker/releases/download/19-1.4.2/updatelocker_v1.4.2_icon.apk"
 SUM_UL="7e157f7847e4ac1e7a2262f9865740f405c3a6346108d08dec835f3e7cae12ee"
 URL_HMA="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/hidemyapplist/config.json"
-SUM_HMA="bd3e1754d1fdb8147130e3e8deca2c020351fe5a4e600529dd21cb2c0c348c13"
-URL_HMA2="https://github.com/frknkrc44/HMA-OSS/releases/download/oss-151/HMA-OSS-oss-151-release.apk"
-SUM_HMA2="9f17f0569cb0192d4fefe6171965c49af5d80d13270ded97ed5fc3d854bab8e3"
+SUM_HMA="8cbdab788ef483076095952abf6d254b6cb0f9b4fdff6204ef954ff3a31d8992"
+URL_HMA2="https://github.com/frknkrc44/HMA-OSS/releases/download/oss-158/HMA-OSS-oss-158-release.apk"
+SUM_HMA2="afa03331a9e572ede6bdffb7eac873653b576cda81057e4f2d6152023b91085c"
 URL_RP="https://github.com/uragiristereo/Reverse_Pixelify/releases/download/v1.0/Reverse_Pixelify_v1.0.apk"
 SUM_RP="d7c69f958bfdec13f8d3ded5cf34705cf3743645aad713813f463aefab9d971a"
 URL_KW="https://github.com/5ec1cff/KsuWebUIStandalone/releases/download/v1.0/KsuWebUI-1.0-34-release.apk"
@@ -66,7 +66,6 @@ WIDTH=55
 BRAND_PROP=$(getprop ro.product.system.brand)
 
 mkdir -p "$BOX" "$LOGDIR"
-print_quote
 ensure_exec_permissions
 recommended_settings
 ensure_blacklist_entries
@@ -173,6 +172,8 @@ if [ -e "$BOX/ota" ]; then
     rm -f "$BOX/NoLineageProp"
     rm -rf "$BOX/override"
     rm -rf "$BOX/ota"
+    touch "$BOX/safemode"
+    echo " "
     echo " "
     echo "  D O N E 👍 | REBOOT YOUR DEVICE"
     handle_delay
@@ -268,11 +269,6 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >>"$CPP"; }
 # Exit if offline
 #if ! megatron; then exit 1; fi
 
-sh "$UPDATE" || { sleep 10; exit 1; }
-
-# Show header
-print_header
-
 # Description content update
 {
   for p in /data/adb/modules/busybox-ndk/system/*/busybox \
@@ -295,8 +291,18 @@ print_header
   fi
 } || true
 
-# Run steps
+# Show header
+print_header
 
+sh "$UPDATE" || { sleep 10; exit 1; }
+
+echo " "
+echo "════════════════════════════════"
+echo "      Activating Integrity Engine"
+echo "════════════════════════════════"
+echo " "
+  
+# RUN STEPS
 # Ensure log file exists
 mkdir -p "$(dirname "$CPP")" 2>/dev/null || true
 touch "$CPP" 2>/dev/null || true
@@ -430,7 +436,7 @@ if [ ! -f "$SKIP_FILE" ] && [ "$orig_selinux" = "Enforcing" ]; then
     setenforce 0
 fi
 
-[ -f "$TARGET" ] && mv -f "$TARGET" "$BACKUP" && made_backup=1 && log_step "BACKUP" "$BACKUP"
+[ -f "$TARGET" ] && mv -f "$TARGET" "$BACKUP" && made_backup=1 && log_step "ARCHIVE" "Target List"
 
 teeBroken="false"
 TEE_STATUS="$TARGET_DIR/tee_status"
@@ -453,14 +459,14 @@ if [ -s "$BLACKLIST" ]; then
     sed -i 's/^[[:space:]]*//;s/[[:space:]]*$//' "$BLACKLIST"
     grep -Fvxf "$BLACKLIST" "$TMP" > "${TMP}.filtered" || true
     mv -f "${TMP}.filtered" "$TMP"
-    log_step "CLEANED" "Blacklisted Apps removed"
+    log_step "CLEANED" "Blacklisted Apps"
 else
     log_step "SKIPPED" "Blacklist not configured"
 fi
 
-[ "$teeBroken" = "true" ] && sed -i 's/$/!/' "$TMP" && log_step "SUPPORT" "TEE Broken detected"
+[ "$teeBroken" = "true" ] && sed -i 's/$/!/' "$TMP" && log_step "SUPPORT" "TEE Broken Device"
 
-mv -f "$TMP" "$TARGET" && success=1 && log_step "UPDATED" "Target Packages updated"
+mv -f "$TMP" "$TARGET" && success=1 && log_step "UPDATED" "Target Packages"
 
 if [ ! -f "$SKIP_FILE" ] && [ "$orig_selinux" = "Enforcing" ]; then
     setenforce 1
@@ -473,7 +479,7 @@ else
     FP_SCRIPT="$MODPATH/osm0sis.sh"
     [ ! -f "$FP_SCRIPT" ] && FP_SCRIPT="$MODPATH/osm0sis.sh"
     if [ -n "$FP_SCRIPT" ]; then
-        sh "$FP_SCRIPT" >/dev/null 2>&1 && log_step "UPDATED" "Pixel Fingerprint" || log_step "FAILED" "Fingerprint update"
+        sh "$FP_SCRIPT" >/dev/null 2>&1 && log_step "UPDATED" "Pixel Canary Imprint" || log_step "FAILED" "Fingerprint update"
     else
         log_step "WARNING" "PLEASE RE-FLASH THE MODULE"
     fi
@@ -508,7 +514,7 @@ else
         log_step "FAILED" "resetprop not found"
       fi
     else
-      log_step "SKIPPED" "All Good, Resetprop not Required"
+      log_step "SKIPPED" "Patch Spoofing not Required"
     fi
   fi
 fi
@@ -523,6 +529,12 @@ done
 log_step "STOPPED" "Droidguard Processes"
 
 sh "$SCRIPT_DIR/cleanup.sh" >/dev/null 2>&1; 
+
+# TSA Farewell || Disable auto target update of outdated module 
+if [ -f "/data/adb/modules/tsupport-advance/service.sh" ]; then
+    mkdir -p "/sdcard/TSupportConfig"
+    touch "/sdcard/TSupportConfig/stop-tspa-auto-target"
+fi
 echo " "
 echo " "
 echo "    ACTION COMPLETED SUCCESSFULLY"

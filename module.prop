@@ -1,12 +1,12 @@
 id=playintegrityfix
 name=.𝙄𝙣𝙩𝙚𝙜𝙧𝙞𝙩𝙮 𝘽𝙤𝙭 📦
-version=v32
-versionCode=32000
+version=v34
+versionCode=34000
 author=𝗠𝗘𝗢𝗪𝗻𝗮 💅
 updateJson=https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/release.json
 support=https://t.me/MeowDump
 donate=https://MeowDump.github.io
-banner=meow.png
+banner=https://4kwallpapers.com/images/walls/thumbs_3t/19039.jpg
 webuiIcon=icon.png
 actionIcon=icon.png
-description=A toolkit for managing play integrity & system environment 
+description=Stop posting Play Integrity screenshots. Every unnecessary check burns keyboxes quicker. Nobody cares about your "STRONG INTEGRITY" screenshot.

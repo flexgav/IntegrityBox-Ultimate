@@ -3,9 +3,9 @@ MODPATH="${0%/*}"
 . $MODPATH/common_func.sh
 
 # Module path and file references
+SCRIPT="$MODPATH/webroot/common_scripts/autopilot.sh"
 LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
 PROP="/data/adb/modules/playintegrityfix/system.prop"
-SCRIPT="/data/adb/modules/playintegrityfix/webroot/common_scripts/override_lineage.sh"
 PROP1="ro.crypto.state=encrypted"
 PROP2="ro.build.tags=release-keys"
 PROP3="ro.build.type=user"
@@ -24,16 +24,6 @@ mkdir -p "$LOG_DIR"
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') | $1" | tee -a "$LOG"
 }
-
-# Stop when safe mode is enabled 
-#if [ -f "/data/adb/Box-Brain/safemode" ]; then
-#    exit 1
-#fi
-
-# Run script
-if [ -f "$SCRIPT" ]; then
-    sh "$SCRIPT"
-fi
 
 # Spoof Encryption 
 {
@@ -171,3 +161,30 @@ resetprop_if_diff vendor.boot.vbmeta.device_state locked
 resetprop_if_diff sys.oem_unlock_allowed 0
 
 }&
+
+# Stop when needed
+if [ -f "/data/adb/Box-Brain/rukja" ]; then
+    log "Daemon disabled by user"
+    exit 1
+fi
+
+# Restarts daemon if dead
+while true; do
+    if [ -f "/data/adb/Box-Brain/autopilot" ]; then
+        # Check heartbeat
+        last=$(cat /data/adb/Box-Brain/daemon_heartbeat 2>/dev/null || echo "0")
+        now=$(date +%s)
+        
+        # Dead if no heartbeat for 3+ minutes
+        if [ $((now - last)) -gt 180 ]; then
+            # Clean stale locks
+            rm -rf /data/adb/Box-Brain/autorun.lockdir \
+                   /data/adb/Box-Brain/.executing 2>/dev/null
+            
+            # Restart
+            sh "$SCRIPT" >/dev/null 2>&1 &
+        fi
+    fi
+    
+    sleep 60
+done

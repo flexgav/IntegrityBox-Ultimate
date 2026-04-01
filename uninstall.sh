@@ -91,6 +91,11 @@ revert_prop_if_modified "persist.sys.pihooks.disable.gms_props" "true" "false"
 revert_prop_if_modified "persist.sys.pihooks.disable" "1" "0"
 revert_prop_if_modified "persist.sys.kihooks.disable" "1" "0"
 
+# Unhide hidden files
+if [ -f "/data/adb/Vault/.hidefiles/last_action.sh" ]; then
+    sh "/data/adb/Vault/.hidefiles/last_action.sh"
+fi
+
 # Finish
 log "•••••• Integrity-Box Uninstall Completed ••••••"
 sync
