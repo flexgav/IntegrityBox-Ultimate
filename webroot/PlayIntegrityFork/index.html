@@ -338,8 +338,10 @@ const PROP_CANDIDATES = [
 ];
 
 const KEYS = ["spoofBuild","spoofProps","spoofProvider","spoofSignature","spoofVendingFinger","spoofVendingSdk","spoofPixel"];
+const ZYGISK_PATH = "/data/adb/modules/playintegrityfix/zygisk";
 
 let propFile = null;
+let zygiskExists = false;
 
 function showToast(msg){
  document.getElementById('toastText').textContent = msg;
@@ -373,8 +375,8 @@ function updateVisuals(key, isActive){
 }
 
 async function toggle(key){
- if(!propFile){
-   showWarning("Tap module action button first");
+ if(!propFile || !zygiskExists){
+   showWarning("zygiskless mode has been enabled");
    return;
  }
  const input = document.getElementById(key);
@@ -383,11 +385,21 @@ async function toggle(key){
  const newVal = input.checked ? '0' : '1';
  input.checked = !input.checked;
  
- await writeKey(propFile, key, newVal);
- await restartGMS();
+ if(key === 'spoofVendingSdk' && newVal === '1'){
+   await writeKey(propFile, key, newVal);
+   const others = KEYS.filter(k => k !== key && k !== 'spoofBuild' && k !== 'spoofProps');
+   for(const k of others){
+     await writeKey(propFile, k, '0');
+     updateVisuals(k, false);
+   }
+   showToast('A10 mode enabled, others disabled');
+ } else {
+   await writeKey(propFile, key, newVal);
+   showToast(newVal === '1' ? 'Enabled' : 'Disabled');
+ }
  
+ await restartGMS();
  updateVisuals(key, newVal === '1');
- showToast(newVal === '1' ? 'Enabled' : 'Disabled');
 }
 
 async function sh(cmd){
@@ -415,6 +427,11 @@ async function findPropFile(){
    if(out.trim() === 'found') return p;
  }
  return null;
+}
+
+async function checkZygisk(){
+ const out = await sh(`sh -c 'if [ -d "${ZYGISK_PATH}" ]; then echo exists; else echo missing; fi'`);
+ return out.trim() === 'exists';
 }
 
 async function hasAdvancedSettings(file){
@@ -448,6 +465,13 @@ async function restartServices(){
 
 async function init(){
  propFile = await findPropFile();
+ zygiskExists = await checkZygisk();
+ 
+ if(!zygiskExists){
+   showWarning("zygiskless mode has been enabled");
+   KEYS.forEach(k => setDisabled(k, true));
+   return;
+ }
  
  if(!propFile){
    showWarning("Tap module action button first");
