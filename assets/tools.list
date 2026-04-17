@@ -1,0 +1,49 @@
+# IntegrityBox Ultimate - Utility Tools List
+# Format (3 lines per tool, separated by blank lines):
+# 1. FileName
+# 2. URL
+# 3. SHA256
+
+ZygiskNext.zip
+https://github.com/Dr-TSNG/ZygiskNext/releases/download/v1.3.4/Zygisk-Next-1.3.4-746-d1b76b3-release.zip
+b330b368e6133b83c069c0ff1bb1bf81091afec5a8d6532d39c14bd1b7e5d367
+
+TrickyStore.zip
+https://github.com/5ec1cff/TrickyStore/releases/download/1.4.1/Tricky-Store-v1.4.1-245-72b2e84-release.zip
+2f5e73fcba0e4e43b6e96b38f333cbe394873e3a81cf8fe1b831c2fbd6c46ea9
+
+KeyAttestation.apk
+https://github.com/qwq233/KeyAttestation/releases/download/1.8.4/key-attestation-v1.8.4-release.apk
+c9bbc118c75b11bfca7d99b67470d68b5505e1959b6a5f0b298b38ba8104c93a
+
+UpdateLocker.apk
+https://github.com/Xposed-Modules-Repo/ru.mike.updatelocker/releases/download/20-1.4.3/updatelocker_v1.4.3.apk
+6deee6661ac7eac403280c844e9f2e28c38eb524cfbbd7a63d900f25ed962c95
+
+HMA_Config.json
+https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/hidemyapplist/config.json
+0f61928c7d1a6b14e945fdd6a55b6fca3caade1ed9055f7479f725f905f8e0e9
+
+HideMyApplist.apk
+https://github.com/frknkrc44/HMA-OSS/releases/download/oss-158/HMA-OSS-oss-158-release.apk
+afa03331a9e572ede6bdffb7eac873653b576cda81057e4f2d6152023b91085c
+
+Reverse_Pixelify.apk
+https://github.com/uragiristereo/Reverse_Pixelify/releases/download/v1.0/Reverse_Pixelify_v1.0.apk
+d7c69f958bfdec13f8d3ded5cf34705cf3743645aad713813f463aefab9d971a
+
+KSU_WebUI.apk
+https://github.com/5ec1cff/KsuWebUIStandalone/releases/download/v1.0/KsuWebUI-1.0-34-release.apk
+a99e9a66c79d94db7cc5cf0c12607df1790215423e3d917c937dc16093c8135d
+
+Core_Patch.apk
+https://github.com/LSPosed/CorePatch/releases/download/4.9/app-release.apk
+1bdc47d5b48afffd37948a9f5638ae6a5f3d4d02ca01ae36143588284b979996
+
+Thor_Installer.apk
+https://github.com/trinadhthatakula/Thor/releases/download/v1.80.6/foss-release.apk
+81483ca98d1ca4b0dc05e7f7966e433f8507201b28c5f5809c07854bbe9d6b02
+
+Android_Faker.apk
+https://github.com/Android1500/AndroidFaker/releases/download/v1.9.2/app-release.apk
+7d36b972d559e35d1b14ef7e2e9e37a8e5237de585d87511e30e70a31c2d567c

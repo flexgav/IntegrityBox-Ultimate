@@ -1,17 +1,8 @@
-> Release Date: 04/04/2026
+> Release Date: 17/04/2026
 
-#### THIS UPDATE IS MANDATORY 
+#### 🚀 INTEGRITYBOX ULTIMATE - REBORN
 
-- Fixed play service crash
-
-- Stopped [service.d] boot script execution when module is disabled
-
-- Fixed ZN reset button bug
-
-- Fixed Report UI bug
-
-- Fixed broken HMA config (v5)
-
-- Extended maximum target package limit to 150
-
-#### Remember me in your prayers 🤲🏻
+- **Advanced Resource Delivery**: Core components are now securely and dynamically fetched.
+- **Enhanced Stealth Mechanisms**: Upgraded structural integrity to prevent automated analysis.
+- **Strict POSIX Shell**: Re-written core scripts for maximum Android compatibility.
+- **Local Fallback System**: UI and configs work seamlessly even offline.

@@ -1,0 +1,12 @@
+[
+    {
+        "status":  3,
+        "file":  "fg1.json",
+        "hash":  "7dea344ba009468e031ae7cf064295919e0e93c4fd15424569911f40fb17f011"
+    },
+    {
+        "status":  3,
+        "file":  "fg2.json",
+        "hash":  "7c3c00e882471ce68c1fe0c309061b945e6cee439db7887cb053b35f44399d8a"
+    }
+]
