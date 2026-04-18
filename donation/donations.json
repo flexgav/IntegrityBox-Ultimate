@@ -1,0 +1,22 @@
+[
+  {
+    "label": "TRC20 USDT",
+    "address": "TSB67GBY4KFvRGCs1PMxBYN5NdNr23an96",
+    "img": "https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/donation/TRC20.png"
+  },
+  {
+    "label": "BEP20 USDT",
+    "address": "0x4d3006b03bE47487fFF64B523be0da92E34A8E8A",
+    "img": "https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/donation/BEP20.png"
+  },
+  {
+    "label": "Litecoin",
+    "address": "ltc1qm07r0npr9gkntfa6a9dhx6qht853dg2tf3894t",
+    "img": "https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/donation/LTC.png"
+  },
+  {
+    "label": "Toncoin",
+    "address": "UQBmE3NcS_TvD4ZYREky_AiTgE7J4XORsYN9HZFU4lIn0dc3",
+    "img": "https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/donation/TON.png"
+  }
+]
