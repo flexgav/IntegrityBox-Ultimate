@@ -55,4 +55,4 @@ This project uses concepts and code from the following amazing open-source work:
 - **LSPosed Team** for Shamiko's late start service script.
 - **MeowDump** for the original Integrity-Box foundation.
 - **You**, for using this module.
-- ☝️ **GOD**, for everything 🙌.
+- ☝️ **Common Sense**, for everything 🙌.
