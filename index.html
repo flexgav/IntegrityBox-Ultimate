@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>IntegrityBox Ultimate</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #000000;
+            --fg: #C4C7C5;
+            --text-secondary: rgba(196, 199, 197, 0.7);
+            --accent: #A8C7FA;
+            --panel-bg: rgba(0, 0, 0, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --border-radius: 16px;
+            --success: #81C995;
+            --warning: #FFB74D;
+            --danger: #F28B82;
+        }
+        body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+        #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        
+        .module-card { background: var(--panel-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: var(--border-radius); border: 1px solid var(--card-border); padding: 32px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        .hero { text-align: center; margin-bottom: 12px; }
+        .hero img { width: 100%; max-width: 700px; border-radius: 16px; border: 1px solid var(--card-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 24px; }
+        .hero h1 { font-size: 2.5rem; color: var(--accent); margin: 0 0 8px 0; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .hero p { font-size: 1.1rem; color: var(--text-secondary); margin: 0 0 24px 0; }
+        
+        h2 { display: flex; align-items: center; gap: 12px; color: var(--accent); border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-top: 0; font-size: 1.5rem; }
+        
+        .list-item { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .status-chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); }
+        .status-chip.danger { color: var(--danger); background: rgba(242, 139, 130, 0.15); border-color: rgba(242, 139, 130, 0.3); }
+        .status-chip.success { color: var(--success); background: rgba(129, 201, 149, 0.15); border-color: rgba(129, 201, 149, 0.3); }
+        .status-chip.warning { color: var(--warning); background: rgba(255, 183, 77, 0.15); border-color: rgba(255, 183, 77, 0.3); }
+        .status-chip.accent { color: var(--accent); background: rgba(168, 199, 250, 0.15); border-color: rgba(168, 199, 250, 0.3); }
+        
+        .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(168, 199, 250, 0.15); color: var(--accent); border: 1px solid rgba(168, 199, 250, 0.3); padding: 12px 28px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 1.05rem; transition: all 0.2s ease; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .action-btn:hover { background: rgba(168, 199, 250, 0.25); transform: translateY(-2px); border-color: rgba(168, 199, 250, 0.5); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+        
+        code { background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: var(--accent); font-family: monospace; border: 1px solid var(--card-border); }
+        ul, ol { margin: 0; padding-left: 24px; color: var(--text-secondary); }
+        li { margin-bottom: 10px; }
+        li:last-child { margin-bottom: 0; }
+        b, strong { color: var(--fg); font-weight: 600; }
+        
+        .footer-img { display: block; margin: 40px auto 0; opacity: 0.8; transition: opacity 0.2s; }
+        .footer-img:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+    <canvas id="starfield"></canvas>
+    
+    <div class="container">
+        <div class="module-card">
+            <div class="hero">
+                <img src="ibu.png" alt="IntegrityBox Ultimate Banner" onerror="this.style.display='none'">
+                <h1><span class="material-symbols-outlined" style="font-size: 2.5rem;">shield</span> IntegrityBox Ultimate</h1>
+                <p><b>Advanced Android Environment & Attestation Manager</b></p>
+                <a href="https://github.com/flexgav/IntegrityBox-Ultimate/releases" class="action-btn" target="_blank">
+                    <span class="material-symbols-outlined">download</span> Download Latest Release
+                </a>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <h2><span class="material-symbols-outlined">rocket_launch</span> Overview</h2>
+            <p style="color: var(--text-secondary); margin: 0;"><strong>IntegrityBox Ultimate</strong> is a comprehensive, modular toolkit designed for advanced Android environment management, system identity alignment, and deep diagnostics. Built with a focus on performance, security, and a beautiful Material You WebUI, it provides a robust framework for managing hardware-backed attestation components and evading strict system detections.</p>
+        </div>
+
+        <div class="module-card">
+            <h2><span class="material-symbols-outlined">checklist</span> Requirements</h2>
+            <div class="list-item">
+                <div style="color: var(--text-secondary);">To utilize the full potential of IntegrityBox Ultimate, ensure you have the following modules installed alongside it:</div>
+                <ol>
+                    <li><b>Tricky Store</b> or <b>TEE Simulator</b> <i>(Required for hardware attestation)</i>.</li>
+                    <li><b>Zygisk Next</b> or <b>ReZygisk</b> <i>(Optional if using Zygiskless Mode)</i>.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <h2><span class="material-symbols-outlined">build</span> Installation & Setup</h2>
+            <div class="list-item">
+                <div style="color: var(--text-secondary);">IntegrityBox Ultimate is designed to be "flash and forget", but requires a brief initial setup:</div>
+                <ol>
+                    <li><b>Install</b> the required modules listed above and reboot.</li>
+                    <li><b>Flash</b> IntegrityBox Ultimate via your Root Manager (KernelSU, APatch, or Magisk).</li>
+                    <li><b>Reboot</b> your device.</li>
+                    <li><b>Open the WebUI:</b> Go to your Root Manager's module list and tap the action/settings button on the IntegrityBox Ultimate module.</li>
+                    <li><b>Explore:</b> Use the dashboard to check your current status, set up AutoPilot, or apply necessary patches.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <h2><span class="material-symbols-outlined">library_books</span> Built-in Knowledge Base</h2>
+            <div class="list-item">
+                <div style="color: var(--text-secondary);">We have eliminated the need for a massive, hard-to-read documentation. <b>IntegrityBox Ultimate features a comprehensive, interactive Knowledge Base directly inside the WebUI.</b></div>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 18px; color: var(--warning); margin-right: 8px;">lightbulb</span> <b>Module Guides:</b> Tap the blinking lightbulb icon at the top of any module page to learn exactly what that specific tool does.</li>
+                    <li><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 18px; margin-right: 8px;">info</span> <b>Feature Details:</b> Tap the ( i ) buttons next to individual sections for in-depth technical explanations of toggles and badges.</li>
+                    <li><span class="material-symbols-outlined" style="vertical-align: text-bottom; font-size: 18px; color: var(--accent); margin-right: 8px;">support_agent</span> <b>AI Assistant:</b> An offline, built-in AI Assistant is available in the WebUI to answer common questions interactively.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <h2><span class="material-symbols-outlined">troubleshoot</span> Quick Troubleshooting</h2>
+            <div class="list-item">
+                <ul>
+                    <li><b>Failing Play Integrity?</b> Ensure your SELinux is set to <code>Enforcing</code>. Permissive mode will cause immediate failures. Check if your hardware keybox is valid or banned.</li>
+                    <li><b>"Device not certified"?</b> Use the <b>Certification Fix</b> module in the WebUI to perform a deep data wipe of Play Services.</li>
+                    <li><b>Banking apps crashing?</b> Use the <b>Applist Detector</b> and <b>Hide Suspicious Files</b> modules to mask your root environment from aggressive anti-cheat scans.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <h2><span class="material-symbols-outlined">handshake</span> Credits & Acknowledgements</h2>
+            <div class="list-item">
+                <div style="color: var(--text-secondary);">This project uses concepts and code from the following amazing open-source work:</div>
+                <ul>
+                    <li>@ez-me for ezme-nodebug.</li>
+                    <li>@osm0sis for PlayIntegrityFork.</li>
+                    <li><b>LSPosed Team</b> for Shamiko's late start service script.</li>
+                    <li><b>MeowDump</b> for the original Integrity-Box foundation.</li>
+                    <li><b>You</b>, for using this module.</li>
+                    <li>☝️ <b>GOD</b>, for everything 🙌.</li>
+                </ul>
+            </div>
+        </div>
+
+        <a href="https://github.com/catppuccin/catppuccin" target="_blank">
+            <img class="footer-img" src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/footers/gray0_ctp_on_line.svg?sanitize=true" alt="Catppuccin Footer" />
+        </a>
+    </div>
+
+    <script>
+        // Lightweight 30 FPS Starfield
+        (function() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const stars = Array.from({length: 250}, () => ({ x: Math.random() * 2000 - 1000, y: Math.random() * 2000 - 1000, z: Math.random() * 2000 }));
+            let lastFrame = 0;
+
+            function render(time) {
+                requestAnimationFrame(render);
+                if (time - lastFrame < 1000 / 30) return;
+                lastFrame = time;
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                const cx = width / 2; const cy = height / 2;
+                for (let i = 0; i < stars.length; i++) {
+                    let star = stars[i];
+                    star.z -= 10;
+                    if (star.z <= 0) { star.z = 2000; star.x = Math.random() * 2000 - 1000; star.y = Math.random() * 2000 - 1000; }
+                    let px = cx + (star.x / star.z) * 1000;
+                    let py = cy + (star.y / star.z) * 1000;
+                    if (px >= 0 && px <= width && py >= 0 && py <= height) {
+                        ctx.beginPath(); ctx.arc(px, py, (1 - star.z / 2000) * 2, 0, 6.28); ctx.fill();
+                    }
+                }
+            }
+            requestAnimationFrame(render);
+        })();
+    </script>
+</body>
+</html>
