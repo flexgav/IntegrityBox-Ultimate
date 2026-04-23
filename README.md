@@ -4,7 +4,7 @@
   <p><b>Advanced Android Environment & Attestation Manager</b></p>
   
   <a href="https://github.com/flexgav/IntegrityBox-Ultimate/releases" target="_blank">
-    <img src="https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/assets/download.png" alt="Download Button" width="250">
+    <img src="https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/assets/download.png" alt="Download Button" width="150">
   </a>
 </div>
 
