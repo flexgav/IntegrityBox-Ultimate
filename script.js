@@ -11,25 +11,46 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('resize', resize);
     resize();
 
-    const stars = Array.from({length: 250}, () => ({ x: Math.random() * 2000 - 1000, y: Math.random() * 2000 - 1000, z: Math.random() * 2000 }));
+    const MathRandom = Math.random;
+    function createMeteor() {
+        return {
+            x: MathRandom() * (width + height) - height,
+            y: MathRandom() * height * 2 - height,
+            length: MathRandom() * 60 + 15,
+            speed: MathRandom() * 10 + 5,
+            opacity: MathRandom() * 0.5 + 0.1,
+            weight: MathRandom() * 1.5 + 0.5
+        };
+    }
+
+    const meteors = Array.from({length: 80}, createMeteor);
     let lastFrame = 0;
 
     function render(time) {
         requestAnimationFrame(render);
         if (time - lastFrame < 1000 / 30) return;
         lastFrame = time;
+        
         ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        const cx = width / 2; const cy = height / 2;
-        for (let i = 0; i < stars.length; i++) {
-            let star = stars[i];
-            star.z -= 10;
-            if (star.z <= 0) { star.z = 2000; star.x = Math.random() * 2000 - 1000; star.y = Math.random() * 2000 - 1000; }
-            let px = cx + (star.x / star.z) * 1000;
-            let py = cy + (star.y / star.z) * 1000;
-            if (px >= 0 && px <= width && py >= 0 && py <= height) {
-                ctx.beginPath(); ctx.arc(px, py, (1 - star.z / 2000) * 2, 0, 6.28); ctx.fill();
+        
+        for (let i = 0; i < meteors.length; i++) {
+            let m = meteors[i];
+            
+            m.x += m.speed;
+            m.y += m.speed;
+            
+            if (m.x > width + m.length || m.y > height + m.length) {
+                m.x = MathRandom() * (width + height) - height;
+                m.y = -m.length - MathRandom() * 100;
+                m.speed = MathRandom() * 10 + 5;
             }
+            
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255, 255, 255, ${m.opacity})`;
+            ctx.lineWidth = m.weight;
+            ctx.moveTo(m.x, m.y);
+            ctx.lineTo(m.x - m.length, m.y - m.length);
+            ctx.stroke();
         }
     }
     requestAnimationFrame(render);
