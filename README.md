@@ -6,6 +6,10 @@
   <a href="https://github.com/flexgav/IntegrityBox-Ultimate/releases" target="_blank">
     <img src="https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/assets/download.png" alt="Download Button" width="150">
   </a>
+  <br><br>
+  <a href="https://flexgav.github.io/IntegrityBox-Ultimate/" target="_blank">
+    <img src="https://img.shields.io/badge/🌐_Official_Website-Visit_Now-A8C7FA?style=for-the-badge&labelColor=black" alt="Visit Website">
+  </a>
 </div>
 
 <br>
