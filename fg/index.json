@@ -1,6 +1,68 @@
-{
-    "file":  "fg1.json",
-    "status":  3,
-    "updated":  "2026-09-29T17:29:38Z",
-    "hash":  "bd7e2bd49bbf803dc3226ed8ba0466eb20fa2aba8c38ef23df164d5828d11f99"
-}
+[
+    {
+        "file":  "fg1.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "179cc9c218df3093946e35027c7c37a11a7e04472a38970f25604cde8bd3edc8"
+    },
+    {
+        "file":  "fg2.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "433d427e74f7b2ee78ed7ded21668dc8bc53e816713ad5ae1152c09d1b6a15b0"
+    },
+    {
+        "file":  "fg3.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "8ab50f899f9269e9b4162d1ca479ca62c6735035b0d6834cd20854e4c53cc7e9"
+    },
+    {
+        "file":  "fg4.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "8d5b90199410bd7fa50750b964cacda1ae1625ba6af98eaef889d15952f8b0e1"
+    },
+    {
+        "file":  "fg5.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "8e4389d686ef0340e0747fcdd6b0311731aa0573667cb1a701c1d1e005596f02"
+    },
+    {
+        "file":  "fg6.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "9de3ecd38d3ebc030e2615c0e72522b1a7f326e135bd73de7d5d9c99c8a036e5"
+    },
+    {
+        "file":  "fg7.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "e35c62ef8f3052cc4898cc5a98e39500f64b08cf43270f927305b75ea11f04c3"
+    },
+    {
+        "file":  "fg8.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "e94bea65a83bf9981110334bd5d4e37f2a38df61d8ff322714be46944e378198"
+    },
+    {
+        "file":  "fg9.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "f96b369d379fb24f8a321f6fb08f1b2087d368265c522f09d8175dd819d5c58d"
+    },
+    {
+        "file":  "fg10.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "fd5da1f19e8362bb27a1bf9deaeaa8d7e06680b7f21412e87618a871dbb5f622"
+    },
+    {
+        "file":  "fg11.json",
+        "status":  3,
+        "updated":  "2026-09-29T22:54:27Z",
+        "hash":  "bd7e2bd49bbf803dc3226ed8ba0466eb20fa2aba8c38ef23df164d5828d11f99"
+    }
+]
