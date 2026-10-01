@@ -1,0 +1,202 @@
+{
+  "format": "integritybox.target-list",
+  "version": 1,
+  "profiles": [
+    {
+      "id": "default",
+      "keybox": null
+    }
+  ],
+  "targets": [
+    {
+      "package": "com.google.android.gms",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.android.vending",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.google.android.gsf",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.google.android.apps.walletnfcrel",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.google.android.safetycore",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.google.android.contactkeys",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.google.android.apps.nbu.paisa.user",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.revolut.revolut",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.vvb2060.keyattestation",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.qwq233.keyattestation",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.kukushivan.keyboxchecker",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.flexgavna.keybox",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "gr.nikolasspyr.integritycheck",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "org.akanework.checker",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.example.snichecker",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "krypton.tbsafetychecker",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.eltavine.duckdetector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.studio.duckdetector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.reveny.nativecheck",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "icu.nullptr.nativetest",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "icu.nullptr.applistdetector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.vvb2060.magiskdetector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.vvb2060.xposeddetector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.vvb2060.mahoshojo",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.byxiaorun.detector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.example.rootdetectorapp",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.scottyab.rootbeer.sample",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.kimchangyoun.rootbeerFresh.sample",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.gauravssnl.bypassrootcheck.pro",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.kozhevin.rootchecks",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.huskydg.memorydetector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "io.github.rabehx.securify",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "es.chiteroman.bootloaderspoofer",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.takattowo.bootloaderspoofer",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.javster.cardemulationdetector",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "joerikros.nfcchecker",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.androidfung.drminfo",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
+      "package": "com.by_syk.apkchecker",
+      "mode": "auto",
+      "profile": "default"
+    }
+  ]
+}

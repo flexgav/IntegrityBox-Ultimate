@@ -34,11 +34,11 @@
 **IntegrityBox Ultimate** is a practical toolkit for keeping an Android device with root access clean, certified, and easier to manage. It brings keybox handling, Play Integrity helpers, app-hiding templates, Google services cleanup, and device status checks into one Material You WebUI.
 
 ### ✨ Highlights
-* ️ **Play Integrity in one place:** manage PIF, Keybox, `target.txt`, Boot Hash, and Security Patch without stacking multiple conflicting modules.
+* ️ **Play Integrity in one place:** manage PIF, Keybox, Target List, Boot Hash, and Security Patch without stacking multiple conflicting modules.
 * 🔑 **Keybox Hub:** cloud Keybox catalog, cached fallback, local XML import from `/sdcard/Download` and `/sdcard/Documents`, active Keybox selection, and state checks in **Integrity Checker**. The freshest published **non-revoked** cloud Keybox always takes priority and supersedes a manual pin; the manual pin only applies when the cloud is unreachable.
 * 🚫 **Keybox revocation checks:** keyboxes are matched against Google's certificate revocation list, and each one is tagged **ACTUAL / REVOKED / UNCHECKED**. A revoked key is no longer treated as usable: the engine switches to the next actual keybox on its own, and if *all* candidates are revoked it keeps the current one applied (a revoked key still passes for a few days until GMS syncs the ban) and switches as soon as an actual keybox appears. Only the public bulk list is used — downloaded, matched locally, discarded — so your specific key is never sent anywhere and cannot accelerate its own ban.
 * 🧬 **Fingerprint Selector:** built-in profile pool, scheduled PIF updates/application, manual Action refresh, and visible source information for the active profile.
-* 🎯 **Target Box:** automatic `target.txt` generation, protected Manual mode, import and backup, plus per-app Default/AOSP/Private profiles and AUTO/GENERATE/LEAF modes.
+* 🎯 **Target Box:** automatic Target List generation, protected Manual mode, import and backup, plus per-app Default/AOSP/Private profiles and AUTO/GENERATE/LEAF modes.
 * 🗓️ **Security Patch:** automatic patch-date detection from PIF plus manual override through a date picker.
 * 🔓 **Boot Hash Spoofer:** extract the real device Boot Hash and apply a manual override for apps that check bootloader or VBMeta state.
 * 🛡️ **TEE / Widevine tools:** TEE state diagnostics, hardware-attestation backend support, and Widevine L1 repair attempts on supported devices.
@@ -56,7 +56,7 @@
 * **Installing for the first time?** Start with [Installation & Ultimate Setup Guide](#-installation--ultimate-setup-guide).
 * **Not sure what must be removed first?** See [Conflicting modules](#️-conflicting-modules-to-remove-or-disable).
 * **Need Tricky Store, Zygisk, HMA, or other tools?** See [Core Requirements](#-core-requirements), [Optional, but highly recommended](#-optional-but-highly-recommended), and [Integrity Downloader](#-useful-tools-from-integrity-downloader).
-* **Want manual control over `target.txt`?** See [Automatic and Manual Target List Control](#-automatic-and-manual-target-list-control).
+* **Want manual control over Target List?** See [Automatic and Manual Target List Control](#-automatic-and-manual-target-list-control).
 * **Something fails or an app detects root?** See [Quick Troubleshooting](#️-quick-troubleshooting).
 
 ---
@@ -354,11 +354,11 @@ Every item below **deletes the selected prop** from the current Android property
 </details>
 
 ### 🎯 Automatic and Manual Target List Control
-In automatic mode, **Target Box** builds `/data/adb/tricky_store/target.txt` from a managed app list. You can view the current template in the repository:
+In automatic mode, **Target Box** builds `/data/adb/Box-Brain/target.json` from a managed app list. You can view the current template in the repository:
 
-[targetList/target.list](https://github.com/flexgav/IntegrityBox-Ultimate/blob/main/targetList/target.list)
+[targetList/target.json](https://github.com/flexgav/IntegrityBox-Ultimate/blob/main/targetList/target.json)
 
-The module first tries to fetch the latest list from the repository. If the network is unavailable, it uses the last cached list; if no cache exists yet, it falls back to the bundled list from the module ZIP. Before changing `target.txt`, the current file is backed up to `/data/adb/tricky_store/target.txt.bak`.
+The module first tries to fetch the latest list from the repository. If the network is unavailable, it uses the last cached list; if no cache exists yet, it falls back to the bundled list from the module ZIP. The working snapshot is stored as `/data/adb/Box-Brain/target.json`; native backend files are handled only by the backend API.
 
 The automatic list includes:
 
@@ -373,13 +373,13 @@ If the TEE/backend is marked as broken or its state cannot be determined, the mo
 If you want to use your own app list instead of the automatic template:
 
 1. Open WebUI -> **Customize Tricky Store** -> **Target Box**.
-2. Disable **Auto Update Target List** if you want full manual control over `target.txt`.
-3. Use **Import Target** to select your own `target.txt` through the built-in file picker.
+2. Disable **Auto Update Target List** if you want full manual control over Target List.
+3. Use **Import Target** to select an IntegrityBox Target List JSON file through the built-in file picker.
 4. For per-app tuning, enable the app in Target Box, then select the **Default**, **AOSP**, or **Private** profile and the **AUTO**, **GENERATE**, or **LEAF** mode. You can also select several apps and apply one configuration in bulk.
-5. If you enable **Auto Update Target List** again, the module will apply its own rules and refresh the displayed app list from the current `target.txt`.
+5. If you enable **Auto Update Target List** again, the module will apply its own rules and refresh the displayed app list from the current Target List.
 
 > [!NOTE]
-> In automatic mode, Target Box updates by schedule through AutoPilot and when Action runs. Manual mode protects your own `target.txt` from being overwritten. Before changing the file, the module creates a backup, and Target Box state is included in the diagnostic report.
+> In automatic mode, Target Box updates by schedule through AutoPilot and when Action runs. Manual mode protects your own Target List from being overwritten. Before changing the file, the module creates a backup, and Target Box state is included in the diagnostic report.
 
 ---
 
