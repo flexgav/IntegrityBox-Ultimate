@@ -12,8 +12,15 @@
 #include <unordered_set>
 #include <utility>
 
+#include <dlfcn.h>
 #include "zygisk.hpp"
-#include "dobby.h"
+#include "shadowhook.h"
+
+// ShadowHook tracks the Bionic linker via its own sh_linker_init; on newer
+// Android that tracking can crash the host. PIFork v18 neutralizes it with a
+// dummy strong symbol (CMake renames the library's own sh_linker_init to
+// sh_linker_init_dummy so this one wins). Keep in sync with the CMake PATCH_COMMAND.
+extern "C" int sh_linker_init(void) { return 0; }
 
 #define DEX_FILE_PATH "/data/adb/modules/playintegrityfix/classes.dex"
 #define CUSTOM_PROP_FILE_PATH "/data/adb/modules/playintegrityfix/cust.spf.prop"
@@ -161,26 +168,75 @@ static void my_system_property_read_callback(const prop_info *pi, T_Callback cal
 
 static void doHook()
 {
-    // Restrict the resolve to libc.so first (faster, fewer traces), falling back
-    // to a full scan if the soname differs on the device (B1).
-    void *handle = DobbySymbolResolver("libc.so", "__system_property_read_callback");
-    if (handle == nullptr)
+    // PIFork v18 switched from Dobby to ShadowHook: GMS began detecting Dobby,
+    // which broke <A13 Play Integrity, Wallet and RCS. ShadowHook resolves the
+    // target itself; dlsym gives us the address to hook (lighter than an ELF
+    // symbol scan, and no Dobby symbols in the dynamic table).
+    shadowhook_init(SHADOWHOOK_MODE_UNIQUE, false);
+
+    void *sym_addr = dlsym(RTLD_DEFAULT, "__system_property_read_callback");
+    if (sym_addr == nullptr)
     {
-        handle = DobbySymbolResolver(nullptr, "__system_property_read_callback");
-    }
-    if (handle == nullptr)
-    {
-        LOGE("hook failed: __system_property_read_callback not found");
+        LOGE("hook failed: __system_property_read_callback not found via dlsym");
         return;
     }
-    int rc = DobbyHook(handle, reinterpret_cast<dobby_dummy_func_t>(my_system_property_read_callback),
-                       reinterpret_cast<dobby_dummy_func_t *>(&o_system_property_read_callback));
-    if (rc != 0)
+    void *handle = shadowhook_hook_sym_addr(
+        sym_addr,
+        reinterpret_cast<void *>(my_system_property_read_callback),
+        reinterpret_cast<void **>(&o_system_property_read_callback));
+    if (handle == nullptr)
     {
-        LOGE("DobbyHook failed rc=%d at %p", rc, handle);
+        LOGE("hook failed: shadowhook errno=%d", shadowhook_get_errno());
         return;
     }
-    LOGI("hooked __system_property_read_callback at %p", handle);
+    LOGI("hooked __system_property_read_callback at %p", sym_addr);
+}
+
+// Android 17: ART blocks writing a static final field through plain reflection
+// even after the hidden-API lift, so Build/Build.VERSION spoofing silently
+// stopped applying. PIFork v18's fix (ported here): a JNI setter that bypasses
+// the Java-language final check. The matching Java side (BuildFields) first
+// clears the field's FINAL access flag, then calls this. Registered on the
+// BuildFields class in inject().
+static void setFieldNative(JNIEnv *env, jclass, jobject targetClass, jobject fieldObj, jstring typeObj, jobject valueObj)
+{
+    if (!targetClass || !fieldObj || !typeObj)
+        return;
+    jfieldID fieldID = env->FromReflectedField(fieldObj);
+    if (!fieldID)
+        return;
+    const char *typeName = env->GetStringUTFChars(typeObj, nullptr);
+    if (!typeName)
+        return;
+    jclass cls = static_cast<jclass>(targetClass);
+
+    if (strcmp(typeName, "java.lang.String") == 0)
+    {
+        env->SetStaticObjectField(cls, fieldID, valueObj);
+    }
+    else if (strcmp(typeName, "int") == 0 || strcmp(typeName, "java.lang.Integer") == 0)
+    {
+        jclass box = env->FindClass("java/lang/Integer");
+        jmethodID m = env->GetMethodID(box, "intValue", "()I");
+        env->SetStaticIntField(cls, fieldID, env->CallIntMethod(valueObj, m));
+        env->DeleteLocalRef(box);
+    }
+    else if (strcmp(typeName, "long") == 0 || strcmp(typeName, "java.lang.Long") == 0)
+    {
+        jclass box = env->FindClass("java/lang/Long");
+        jmethodID m = env->GetMethodID(box, "longValue", "()J");
+        env->SetStaticLongField(cls, fieldID, env->CallLongMethod(valueObj, m));
+        env->DeleteLocalRef(box);
+    }
+    else if (strcmp(typeName, "boolean") == 0 || strcmp(typeName, "java.lang.Boolean") == 0)
+    {
+        jclass box = env->FindClass("java/lang/Boolean");
+        jmethodID m = env->GetMethodID(box, "booleanValue", "()Z");
+        env->SetStaticBooleanField(cls, fieldID, env->CallBooleanMethod(valueObj, m));
+        env->DeleteLocalRef(box);
+    }
+
+    env->ReleaseStringUTFChars(typeObj, typeName);
 }
 
 // ---- I/O helpers: full read/write with EINTR retry (A3) -----------------------
@@ -742,6 +798,26 @@ private:
             return;
         }
         jclass entryClass = static_cast<jclass>(entryClassObj);
+
+        // Bind the Android-17 JNI field setter on BuildFields (the single
+        // reflective writer both entry paths use) before init() writes any
+        // Build field. Non-fatal if it fails: BuildFields falls back to plain
+        // reflection, which still works pre-17.
+        {
+            jstring bfName = env->NewStringUTF("es.chiteroman.playintegrityfix.BuildFields");
+            jobject bfClassObj = env->CallObjectMethod(dexCl, loadClass, bfName);
+            if (!checkException("loadClass BuildFields") && bfClassObj)
+            {
+                static const JNINativeMethod bfMethods[] = {
+                    {"setFieldNative",
+                     "(Ljava/lang/Class;Ljava/lang/reflect/Field;Ljava/lang/String;Ljava/lang/Object;)V",
+                     reinterpret_cast<void *>(setFieldNative)}};
+                if (env->RegisterNatives(static_cast<jclass>(bfClassObj), bfMethods, 1) != 0)
+                    checkException("RegisterNatives BuildFields");
+                env->DeleteLocalRef(bfClassObj);
+            }
+            env->DeleteLocalRef(bfName);
+        }
 
         if (isVending)
         {

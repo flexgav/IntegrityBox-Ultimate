@@ -15,7 +15,6 @@ android {
     packaging {
         jniLibs {
             excludes += "**/liblog.so"
-            excludes += "**/libdobby.so"
         }
     }
 
@@ -39,10 +38,10 @@ android {
         }
 
         ndk {
+            // ARM-only: ShadowHook (since the Dobby->ShadowHook switch) has no
+            // x86/x86_64 support, matching PlayIntegrityFork v18.
             abiFilters.add("arm64-v8a")
             abiFilters.add("armeabi-v7a")
-            abiFilters.add("x86")
-            abiFilters.add("x86_64")
         }
     }
 

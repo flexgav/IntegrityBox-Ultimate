@@ -1,4 +1,13 @@
-> Release Date: 29/08/2026
+> Release Date: 11/10/2026
+
+#### 🛠️ IntegrityBox Ultimate v42.7
+
+- **Stopped planting foreign system properties**: the boot scripts and Prop Spoofer used to *create* lock-state and OEM properties even on devices that never had them (e.g. Samsung/MIUI/Realme props on a Motorola, or `sys.oem_unlock_allowed` on Android 16+, which the system itself no longer sets). A property that does not exist on stock is itself a detection signal, so the module now only normalises properties the device already defines and never creates new ones. This clears the "System Properties" red flag some detectors raised after an update.
+- **New — Hide Extra Root Managers** (Module Settings, reboot): reversibly hides the data folders of inactive root managers (for example a leftover Magisk sitting beside an active KernelSU) to avoid multiple-root detection. It only acts when exactly one manager is actually running, and everything is restored when you turn it off or uninstall.
+- **Switching keybox backend now carries your settings over**: changing the active backend (e.g. from Tricky Store to TEESimulator) used to leave the new backend running with its default app list until the next scheduled refresh, so apps you target (Wallet, Play Services, …) were not actually covered. The module now migrates your existing target list, active keybox and patch level to the new backend right after the switch — fully offline, without resetting any of your update schedules. Removing a backend without installing another is now handled cleanly as an "undefined" state (shown as such in status and the report) with no action taken, instead of silently falling back to a default.
+- **OhMyKeymint device identity kept in sync**: when OhMyKeymint is the active keybox backend, its attested device identity (brand/device/product/manufacturer) now follows the active spoof profile, so it can no longer drift from the device props the engine sets.
+- **Cleaner diagnostics & cleanup**: Anti-Detection Nuke now also clears leftover root-manager and GApps installer logs from Download, and the report lists any loose keybox `.xml` files found in Download (a common accidental leak).
+- **Engine updated to PlayIntegrityFork v18**: the native hooking layer moved from Dobby to ShadowHook and gained Android 17 field-write support, for better compatibility on current Android builds.
 
 #### 🛠️ IntegrityBox Ultimate v42.5
 

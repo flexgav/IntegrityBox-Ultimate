@@ -8,14 +8,36 @@ package es.chiteroman.playintegrityfix;
 
 import android.os.Build;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
 final class BuildFields {
     private BuildFields() {}
 
+    // Android 17: ART refuses to write a static final field via plain reflection
+    // even after the hidden-API lift, so Build spoofing silently stopped
+    // applying. PIFork v18's fix (ported): clear the field's FINAL access flag,
+    // then write through a JNI setter that bypasses the language final check.
+    // Registered from native (main.cpp inject()) once the dex is loaded; when it
+    // is not bound (older native, registration failed) nativeBound stays false
+    // and set() falls back to plain reflection, which still works before A17.
+    private static native void setFieldNative(Class<?> targetClass, Field field, String type, Object value);
+    private static volatile boolean nativeBound = true;
+
     // Positive cache: resolved + accessible Build/Build.VERSION fields by name.
     private static final Map<String, Field> CACHE = new HashMap<>();
+
+    // Best-effort: drop the FINAL modifier so even plain reflection (fallback)
+    // has a chance, and so the JNI write is not fighting a final field.
+    private static void clearFinal(Field field) {
+        try {
+            Field accessFlags = Field.class.getDeclaredField("accessFlags");
+            accessFlags.setAccessible(true);
+            accessFlags.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        } catch (Throwable ignored) {
+        }
+    }
 
     private static Field lookup(Class<?> owner, String name) {
         try { return owner.getDeclaredField(name); }
@@ -64,6 +86,20 @@ final class BuildFields {
             else {
                 log.e(name + " type " + type.getName() + " unsupported");
                 return;
+            }
+            clearFinal(field);
+            if (nativeBound) {
+                try {
+                    setFieldNative(field.getDeclaringClass(), field, type.getName(), newValue);
+                    log.d(name + " " + oldValue + " -> " + value);
+                    return;
+                } catch (UnsatisfiedLinkError e) {
+                    // Native setter was never registered: stop trying it and
+                    // fall through to plain reflection for this and later calls.
+                    nativeBound = false;
+                } catch (Throwable e) {
+                    log.e(name + " native set: " + e);
+                }
             }
             field.set(null, newValue);
             log.d(name + " " + oldValue + " -> " + value);
