@@ -2,31 +2,37 @@
     {
         "file":  "fg1.json",
         "status":  3,
-        "updated":  "2026-10-15T09:05:26Z",
+        "updated":  "2026-10-17T13:58:59Z",
         "hash":  "60696f78c3c8e81e6da21b31d1455b62515d8494f2d1495149b11d20fc79c05f"
     },
     {
         "file":  "fg2.json",
         "status":  3,
-        "updated":  "2026-10-15T09:05:26Z",
+        "updated":  "2026-10-17T13:58:59Z",
         "hash":  "1e56abba310b0c2c068806169294fdae97b9427be83591cbb3e86af60b50bba2"
     },
     {
         "file":  "fg3.json",
         "status":  3,
-        "updated":  "2026-10-15T09:05:26Z",
+        "updated":  "2026-10-17T13:58:59Z",
         "hash":  "daa9fdc59e3320d54b16b07354642bd9b825a5dd7d9bfb01fdf911462da8912e"
     },
     {
         "file":  "fg4.json",
         "status":  3,
-        "updated":  "2026-10-15T09:05:26Z",
+        "updated":  "2026-10-17T13:58:59Z",
         "hash":  "665754aa4712ce9b04e6a4f354c0cb51a62e00823c24662b2fedd472b1b35ee7"
     },
     {
         "file":  "fg5.json",
         "status":  3,
-        "updated":  "2026-10-15T09:05:26Z",
+        "updated":  "2026-10-17T13:58:59Z",
+        "hash":  "a33e1d3e610057e827e04b70500c1bc7b72314a2678df2b04370ab3aef8b7e72"
+    },
+    {
+        "file":  "fg6.json",
+        "status":  3,
+        "updated":  "2026-10-17T13:58:59Z",
         "hash":  "c1d65267d93a5cdad4d71e31f13ab5af7b5892622bce6b8477066523e2afba84"
     }
 ]

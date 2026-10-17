@@ -1,8 +1,7 @@
 // First-party source (IntegrityBox, PlayIntegrityFork lineage).
-// GMS/DroidGuard entry point: receives the spoof profile (receiveJson) and
-// applies Build field spoof / KeyStore provider swap / package signature spoof.
-// init(...) and receiveJson(...) are invoked from native (main.cpp) by
-// name+signature — do NOT change them (see sources/dex/README.md).
+// GMS/DroidGuard attestation entry point. Native Build writes precede
+// initAttestation(...); init/receiveJson remain the legacy native/dex ABI.
+// Keep public entry descriptors stable (see sources/dex/README.md).
 //
 // Divergences from upstream:
 //  - No org.lsposed.hiddenapibypass dependency; the hidden-API lift is inlined
@@ -81,6 +80,17 @@ public final class EntryPoint {
         if (spoofSignatureVal > 0) spoofPackageManager();
     }
 
+    // New native path: Build is already applied and the return mask reports
+    // actual Java operations, not merely successful invocation of this method.
+    public static int initAttestation(int logLevel, int provider, int signature) {
+        log.level = logLevel;
+        spoofBuildEnabled = 0;
+        int applied = 0;
+        if (provider > 0 && spoofProvider()) applied |= 1;
+        if (signature > 0 && spoofPackageManager()) applied |= 2;
+        return applied;
+    }
+
     public static void receiveJson(String data) {
         log.i("receiveJson len=" + (data != null ? data.length() : 0));
         if (data == null || data.isEmpty()) {
@@ -105,11 +115,11 @@ public final class EntryPoint {
         deviceSpoofed = false;   // P1: new profile -> allow spoofDevice() to apply again
     }
 
-    private static void spoofProvider() {
+    private static boolean spoofProvider() {
         log.i("spoof provider");
         try {
             Provider provider = Security.getProvider("AndroidKeyStore");
-            if (provider == null) { log.e("provider not found"); return; }
+            if (provider == null) { log.e("provider not found"); return false; }
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
             Field f = keyStore.getClass().getDeclaredField("keyStoreSpi");
             f.setAccessible(true);
@@ -119,8 +129,10 @@ public final class EntryPoint {
             Security.removeProvider("AndroidKeyStore");
             Security.insertProviderAt(customProvider, 1);
             log.i("provider spoofed");
+            return Security.getProvider("AndroidKeyStore") == customProvider;
         } catch (Exception e) {
             log.e("provider failed: " + e.getMessage());
+            return false;
         }
     }
 
@@ -133,18 +145,10 @@ public final class EntryPoint {
         deviceSpoofed = true;
     }
 
-    private static void spoofPackageManager() {
+    private static boolean spoofPackageManager() {
         log.i("spoof signatures");
         Signature spoofedSignature = new Signature(Base64.decode(signatureData, Base64.DEFAULT));
         Parcelable.Creator<PackageInfo> customCreator = new CustomPackageInfoCreator(PackageInfo.CREATOR, spoofedSignature);
-        try {
-            Field creatorField = findField(PackageInfo.class, "CREATOR");
-            creatorField.setAccessible(true);
-            creatorField.set(null, customCreator);
-            log.i("creator replaced");
-        } catch (Exception e) {
-            log.e("creator failed: " + e.getMessage());
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             try {
                 liftHiddenApiRestrictions();
@@ -153,7 +157,32 @@ public final class EntryPoint {
                 log.e("hidden api failed: " + e.getMessage());
             }
         }
+        boolean replaced = false;
+        try {
+            Field creatorField = findField(PackageInfo.class, "CREATOR");
+            creatorField.setAccessible(true);
+            try {
+                creatorField.set(null, customCreator);
+            } catch (IllegalAccessException e) {
+                // ART may reject final-field reflection and abort on JNI writes.
+                // Resolve offsets through Unsafe; never assume an ART layout.
+                Class<?> unsafeClass = Class.forName("jdk.internal.misc.Unsafe");
+                Field singleton = unsafeClass.getDeclaredField("theUnsafe");
+                singleton.setAccessible(true);
+                Object unsafe = singleton.get(null);
+                Object base = unsafeClass.getMethod("staticFieldBase", Field.class).invoke(unsafe, creatorField);
+                long offset = (Long) unsafeClass.getMethod("staticFieldOffset", Field.class).invoke(unsafe, creatorField);
+                unsafeClass.getMethod("putObjectVolatile", Object.class, long.class, Object.class)
+                        .invoke(unsafe, base, offset, customCreator);
+            }
+            replaced = creatorField.get(null) == customCreator;
+        } catch (Exception e) {
+            log.e("creator failed: " + e.getMessage());
+        }
+        if (replaced) log.i("creator replaced");
+        else log.e("creator unchanged");
         clearCaches();
+        return replaced;
     }
 
     // Keep direct reflection as a fallback for runtimes where meta-reflection is blocked.

@@ -368,11 +368,11 @@ The automatic list includes:
 * **Root/Xposed/native detectors:** apps that check root, Zygisk, Xposed, Magisk, app lists, and low-level environment signals.
 * **Additional checkers:** bootloader, NFC, DRM, and APK signature verification apps.
 
-If the TEE/backend is marked as broken or its state cannot be determined, the module applies forced attestation through the active Keybox for Tricky Store compatibility.
+When the active backend confirms a broken TEE, automatic target generation changes AUTO entries to GENERATE. Explicit modes are preserved, and the driver applies the settings according to the backend's capabilities.
 
 If you want to use your own app list instead of the automatic template:
 
-1. Open WebUI -> **Customize Tricky Store** -> **Target Box**.
+1. Open WebUI -> **Backend Settings** -> **Target Box**.
 2. Disable **Auto Update Target List** if you want full manual control over Target List.
 3. Use **Import Target** to select an IntegrityBox Target List JSON file through the built-in file picker.
 4. For per-app tuning, enable the app in Target Box, then select the **Default**, **AOSP**, or **Private** profile and the **AUTO**, **GENERATE**, or **LEAF** mode. You can also select several apps and apply one configuration in bulk.
@@ -431,7 +431,7 @@ If you want to use your own app list instead of the automatic template:
 > Advanced Target Box profiles are configured per app. Do not apply them to all apps at once.
 
 1. First make sure **Active Keybox** in **Integrity Checker** is `ONLINE`.
-2. Open WebUI -> **Customize Tricky Store** -> **Target Box**.
+2. Open WebUI -> **Backend Settings** -> **Target Box**.
 3. Find the target app by name or package name.
 4. Enable Target for the app, then select **Default** profile and **AUTO** mode for the first attempt. Changes are saved automatically.
 5. Force stop the problematic app or reboot, then test it again.

@@ -17,10 +17,8 @@
 -keep class es.chiteroman.playintegrityfix.EntryPoint { public <methods>; }
 -keep class es.chiteroman.playintegrityfix.EntryPointVending { public <methods>; }
 
-# BuildFields.setFieldNative is bound from native (main.cpp inject()) via
-# RegisterNatives by exact name+descriptor, so the class and that method name
-# must survive shrinking/renaming. R8 keeps native methods, but not their
-# owner's name unless pinned here.
+# Older native builds bind BuildFields.setFieldNative by exact name/descriptor.
+# Keep that compatibility surface; the current runtime writes Build directly.
 -keepclasseswithmembernames class es.chiteroman.playintegrityfix.BuildFields {
     native <methods>;
 }

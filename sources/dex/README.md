@@ -8,17 +8,32 @@ zygisk `.so`).
 ## Layout
 
 - `java/es/chiteroman/playintegrityfix/`
-  - `EntryPoint.java` — GMS/DroidGuard entry: `receiveJson` + `init`, Build
-    spoof, KeyStore provider swap, package signature spoof.
-  - `EntryPointVending.java` — Play Store (vending) entry: `init` (fingerprint /
-    Build fields / `SDK_INT`).
+  - `EntryPoint.java` — DroidGuard `initAttestation`: KeyStore provider and
+    package signature operations, each returning its actual completion bit.
+  - `EntryPointVending.java`, `BuildFields.java` — legacy Java Build path,
+    retained for old native/dex pairs during updates.
   - `CustomProvider.java`, `CustomKeyStoreSpi.java` — AndroidKeyStore JCA shim.
   - `CustomPackageInfoCreator.java` — package signature swap.
 - `proguard-rules.pro` — R8 keep rules (the JNI/JCA contract surface).
 
 ## JNI / dex contract (do NOT break)
 
-`main.cpp` loads `classes.dex` and calls these by name and exact descriptor:
+`dex_payload.cpp` loads DEX only for DroidGuard Provider/Signature. Native Build
+writes already ran, so `initAttestation` disables lazy Java Build reapplication.
+The current entry contract is:
+
+| Class (package `es.chiteroman.playintegrityfix`) | Method | Descriptor |
+| --- | --- | --- |
+| `EntryPoint` | `initAttestation` | `(III)I` — verbose, provider, signature; result bits 1=Provider, 2=Signature |
+
+An unavailable Provider or failed creator replacement returns a missing bit,
+which native handles as failure. No exception alone is not proof of success.
+Signature first tries reflection; if ART blocks the final-field write it uses
+platform `jdk.internal.misc.Unsafe` field accessors, then verifies the value and
+clears PackageManager/Parcel caches. Direct JNI writes to PackageInfo.CREATOR
+are deliberately avoided: Android 17 can abort rather than throw an exception.
+
+These old descriptors remain available for compatibility:
 
 | Class (package `es.chiteroman.playintegrityfix`) | Method | Descriptor |
 | --- | --- | --- |
@@ -26,10 +41,10 @@ zygisk `.so`).
 | `EntryPoint` | `init` | `(IIII)V` — verbose, build, provider, signature |
 | `EntryPointVending` | `init` | `(IIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V` — verbose, finger, sdk, fpValue, manuf, model, device, brand |
 
-Class names, method names/descriptors and the package are kept by
-`proguard-rules.pro`. Changing any of them requires a matching edit to the two
-`className`/`GetStaticMethodID` sites in `main.cpp` and a `zygisk-buildkit`
-rebuild of the `.so`.
+Class names, public method names/descriptors and the package are kept by
+`proguard-rules.pro`. Changing an entry requires matching native changes and a
+rebuild of both artifacts. The new native path falls back to old `init` with
+build=0 only if `initAttestation` is absent; old DEX cannot report completion bits.
 
 ## Divergence from upstream
 
@@ -40,16 +55,17 @@ rebuild of the `.so`.
   `org.lsposed.*` classes.
 - **Shared `Logger`** (`Logger.java`) replaces the duplicated static
   `LOG/LOGI/LOGE` scaffolding in `EntryPoint` / `EntryPointVending`.
-- **Shared `BuildFields`** (`BuildFields.java`) unifies the reflective
+- **Legacy `BuildFields`** (`BuildFields.java`) unifies the reflective
   `android.os.Build` / `Build.VERSION` writers (was `setField` /
   `setBuildField` / `spoofSdkInt`) and **caches** resolved `Field`s.
-- **`spoofDevice()` applies once per profile** — a guard makes the repeated
+- **Legacy `spoofDevice()` applies once per profile** — a guard makes the repeated
   calls from `CustomProvider.getService()` (every KeyStore lookup) a no-op;
   `receiveJson()` resets the guard for a re-injected profile.
 - **`CustomKeyStoreSpi`** guards a null delegate (`spi()`) instead of throwing a
   bare `NullPointerException`.
-- Behaviour is otherwise that of the PlayIntegrityFork (chiteroman lineage) Java.
-  These helpers are internal (not in the JNI contract) and may be inlined by R8.
+- Current Build/Vending/per-app operations run in native `build_fields.cpp`
+  without loading DEX. The retained Java Build helpers are compatibility code;
+  they are not invoked by the current runtime.
 
 ## Building
 
