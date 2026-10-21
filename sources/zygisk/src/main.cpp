@@ -32,7 +32,9 @@ public:
         config_ = {};
         dex_.clear();
         g_verboseLogs = 0;
-        if (!args || !args->nice_name || !args->app_data_dir) { unload(); return; }
+        if (!args || !args->nice_name || !args->app_data_dir || args->uid < 0) { unload(); return; }
+        // Spoof list entries are per Android user (work profile, app clones).
+        const auto userId = static_cast<uint32_t>(args->uid) / runtime::kPerUserRange;
         const char *name = env_->GetStringUTFChars(args->nice_name, nullptr);
         if (clearException(env_, "process name") || !name) { unload(); return; }
         process_ = name;
@@ -54,7 +56,7 @@ public:
         companion_protocol::Payload payload;
         {
             companion_protocol::Channel channel(api_->connectCompanion());
-            if (!companion_protocol::sendRequest(channel, process_) || !companion_protocol::receivePayload(channel, payload) ||
+            if (!companion_protocol::sendRequest(channel, process_, userId) || !companion_protocol::receivePayload(channel, payload) ||
                 payload.role == runtime::Role::None) { unload(); return; }
         }
         const auto expected = process_ == runtime::kDroidGuard ? runtime::Role::DroidGuard :
@@ -113,9 +115,10 @@ private:
 void companion(int fd) {
     companion_protocol::Channel channel(fd);
     std::string process;
-    if (!companion_protocol::receiveRequest(channel, process)) return;
+    uint32_t userId = 0;
+    if (!companion_protocol::receiveRequest(channel, process, userId)) return;
     companion_protocol::Payload payload;
-    if (!companion_protocol::preparePayload(process, kConfigPath, kAppsPath, kDexPath, payload)) return;
+    if (!companion_protocol::preparePayload(process, userId, kConfigPath, kAppsPath, kDexPath, payload)) return;
     companion_protocol::sendPayload(channel, payload);
 }
 } // namespace

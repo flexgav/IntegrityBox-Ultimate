@@ -138,21 +138,35 @@ bool validProcess(std::string_view process) {
         process.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.:") == process.npos;
 }
 
-bool listedApp(std::string_view list, std::string_view process) {
+// A plain entry names the process in the primary user; "name@N" names it in
+// user N only. A malformed user suffix matches nothing.
+static bool listedEntry(std::string_view entry, std::string_view process, uint32_t userId) {
+    uint32_t entryUser = 0;
+    const auto at = entry.rfind('@');
+    if (at != entry.npos) {
+        const auto digits = entry.substr(at + 1);
+        const auto parsed = std::from_chars(digits.data(), digits.data() + digits.size(), entryUser);
+        if (digits.empty() || parsed.ec != std::errc() || parsed.ptr != digits.data() + digits.size()) return false;
+        entry = entry.substr(0, at);
+    }
+    return entry == process && entryUser == userId;
+}
+
+bool listedApp(std::string_view list, std::string_view process, uint32_t userId) {
     while (!list.empty()) {
         const auto end = list.find('\n');
         auto line = list.substr(0, end);
         line = trim(line.substr(0, line.find('#')));
-        if (!line.empty() && line == process) return true;
+        if (!line.empty() && listedEntry(line, process, userId)) return true;
         list = end == list.npos ? std::string_view() : list.substr(end + 1);
     }
     return false;
 }
 
-Role selectRole(std::string_view process, const Config &config, std::string_view apps) {
-    if (!validProcess(process)) return Role::None;
+Role selectRole(std::string_view process, uint32_t userId, const Config &config, std::string_view apps) {
+    if (!validProcess(process) || userId > kMaxUserId) return Role::None;
     if (process == kDroidGuard) return Role::DroidGuard;
     if (process == kVending) return Role::Vending;
-    return config.apps && listedApp(apps, process) ? Role::App : Role::None;
+    return config.apps && listedApp(apps, process, userId) ? Role::App : Role::None;
 }
 } // namespace runtime

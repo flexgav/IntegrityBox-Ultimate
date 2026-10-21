@@ -49,6 +49,11 @@
       "profile": "default"
     },
     {
+      "package": "com.paypal.android.p2pmobile",
+      "mode": "auto",
+      "profile": "default"
+    },
+    {
       "package": "io.github.vvb2060.keyattestation",
       "mode": "auto",
       "profile": "default"

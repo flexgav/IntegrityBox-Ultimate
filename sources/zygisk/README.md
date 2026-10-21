@@ -66,6 +66,10 @@ Vending or an exact entry in `spfapps.list` with saved `spoofApps=1`. The boot
 property `sys.spfapps.cfg` only gates per-app connection attempts. Other GMS
 processes are unmounted without receiving spoofing operations.
 
+App entries are per Android user, in TEESimulator's form: `pkg` matches the
+process in the primary user only, `pkg@N` in user N only. The user is the
+process UID divided by 100000. DroidGuard and Vending ignore the user.
+
 The nine existing settings remain authoritative; this runtime never migrates,
 rewrites or overrides them. Dotted properties and suffix rules apply only with
 `spoofProps` in DroidGuard/per-app; native Build writes obey `spoofBuild` there.
@@ -85,7 +89,8 @@ Java result mask distinguishes successful Provider and Signature operations.
 All operations disabled means no property writes, no Build writes and no DEX.
 No upstream script-only marker or module.prop rewrite is introduced.
 
-The wire header has a magic, version and fixed-width fields. Caps are 512 KiB
+The wire header has a magic, version and fixed-width fields; version 2 requests
+carry the Android user ID and version 1 requests are refused. Caps are 512 KiB
 for configuration, 4 MiB for DEX and 256 KiB for app lists. A single 3-second
 deadline covers socket I/O, including partial transfers; failures/EOF reject
 incomplete replies. Files must be nonempty regular files within their cap.

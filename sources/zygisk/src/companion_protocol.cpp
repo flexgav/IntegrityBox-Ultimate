@@ -35,19 +35,20 @@ bool Channel::transfer(void *data, size_t size, bool sending) {
     return true;
 }
 
-bool sendRequest(Channel &channel, const std::string &process) {
-    if (!runtime::validProcess(process)) return false;
-    const Request request{kMagic, kVersion, static_cast<uint32_t>(process.size())};
+bool sendRequest(Channel &channel, const std::string &process, uint32_t userId) {
+    if (!runtime::validProcess(process) || userId > runtime::kMaxUserId) return false;
+    const Request request{kMagic, kVersion, static_cast<uint32_t>(process.size()), userId};
     return channel.write(&request, sizeof(request)) && channel.write(process.data(), process.size());
 }
 
-bool receiveRequest(Channel &channel, std::string &process) {
+bool receiveRequest(Channel &channel, std::string &process, uint32_t &userId) {
     Request request;
     if (!channel.read(&request, sizeof(request)) || request.magic != kMagic || request.version != kVersion ||
-        !request.nameSize || request.nameSize > 1024) return false;
+        !request.nameSize || request.nameSize > 1024 || request.userId > runtime::kMaxUserId) return false;
     std::string name(request.nameSize, '\0');
     if (!channel.read(name.data(), name.size()) || !runtime::validProcess(name)) return false;
     process = std::move(name);
+    userId = request.userId;
     return true;
 }
 
@@ -101,7 +102,7 @@ bool readFile(const char *path, std::vector<char> &data, size_t maximum) {
     return ok;
 }
 
-bool preparePayload(const std::string &process, const char *configPath, const char *appsPath, const char *dexPath, Payload &payload) {
+bool preparePayload(const std::string &process, uint32_t userId, const char *configPath, const char *appsPath, const char *dexPath, Payload &payload) {
     Payload prepared;
     runtime::Config config;
     if (!readFile(configPath, prepared.config, kMaxConfig) ||
@@ -109,7 +110,7 @@ bool preparePayload(const std::string &process, const char *configPath, const ch
     std::vector<char> apps;
     if (process != runtime::kDroidGuard && process != runtime::kVending && config.apps)
         readFile(appsPath, apps, kMaxApps);
-    prepared.role = runtime::selectRole(process, config, {apps.data(), apps.size()});
+    prepared.role = runtime::selectRole(process, userId, config, {apps.data(), apps.size()});
     if (prepared.role == runtime::Role::None) prepared.config.clear();
     else if (config.needsDex(prepared.role)) {
         // An optional payload failure does not discard independent native work.
