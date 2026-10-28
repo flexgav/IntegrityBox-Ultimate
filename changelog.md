@@ -1,3 +1,25 @@
+> Release Date: 26/10/2026
+
+#### 🚀 IntegrityBox Ultimate v43.3
+
+Includes the test builds 42.6 and 42.8–43.2; the 42.7 changes are listed below.
+
+- **Multiple Android users**: Target Box, Spoof Apps, App Data Cleaner and Applist Detector now work with work profiles, app clones and private spaces. An "All" button and a user picker sit above each list, and the pages open on "All". There, a three-position switch turns an app off for every user, restores the earlier user selection or turns it on for every user; a "1/4"-style button under the app opens its users, each with its own switch.
+- **Per-user targets**: with TEESimulator the target list is kept per user. With backends that keep one shared list, an entry applies to every user and Target Box says so. Auto-update now adds the cloud template apps for every user that has them installed; Revolut and PayPal were added to the template.
+- **Per-user Spoof Apps**: the native part now distinguishes Android users, so spoofing turns on only for the user where the app is selected. App Data Cleaner clears cache and data in the selected user, and Applist Detector scans each user.
+- **All common attestation backends**: TrickyStore, TrickyStoreOSS, qwq233's TrickyStore, TEESimulator (v1–v3, RS and v4) and OhMyKeymint run through their own drivers, and the WebUI shows only the settings the installed backend supports. Every write to a backend is verified; a rejected change restores the previous files. TEESimulator now also receives the device identity of the active Fingerprint profile.
+- **Stock security patch mode**: Security Patch gained a third mode that removes the backend date overrides and keeps the firmware's real patch after a reboot; boot scripts no longer re-apply the spoof in this mode.
+- **New spoofing engine**: system properties are now replaced in private copies of the property areas instead of hooking system functions (architecture of KOWX712's inject_s v4.9). The previous hooking was detected by Google Pay. Adds x86_64 builds and Build field writes on Android 17.
+- **Correct API levels in fingerprints**: profiles report the real API level each model shipped with, taken from Google's device sources and kept in a local database for offline use; the board API level is 32. Models that shipped with API 36+ (Pixel 10 and later) are left out of the pool, as they pass only with an RKP-issued keybox.
+- **Fingerprint pool and Random Selection**: the pool takes 5 random Pixel models with no model priority. A new Random Selection switch in Fingerprint Selector applies a random profile after each pool update; when it is off, the held model stays, including its newer builds. Applying a profile from the list holds its model. Advanced Spoofing switches are kept across profile changes and pool updates, and profile cards show the model and board API levels.
+- **Keybox validity**: certificate dates are checked offline with a new EXPIRED status; expired and revoked keyboxes leave normal automatic selection. A manually chosen keybox now keeps priority while it stays in the catalog, valid and unrevoked, instead of being overridden by any fresh cloud keybox. Fixed every keybox showing "Unchecked".
+- **Target List backups and import**: the list, the cloud template and backups use one JSON format that keeps modes, profile bindings and per-user entries. Import previews what the backend keeps, converts or skips, never empties the list when nothing fits, and switches to Manual mode. Bulk selection appears only when the backend supports profiles or modes.
+- **PairIP protection in Spoof Apps**: spoofing breaks apps protected by PairIP, so their APKs are checked on enable, import and list load, and such apps are excluded with a notice. Entries of uninstalled apps are removed automatically.
+- **HMA template for every variant**: the HideMyApplist template applies to original HMA, HMAL and HMA-OSS, including newer OSS versions with service storage. With several installed, the module asks which one to replace; a backup is taken first and a failed write is rolled back.
+- **Redesigned WebUI**: unified WARNING / INFORMATION / ALERT blocks, clearer borders and less transparency in the light theme, and smoother scrolling without heavy blur effects. The help was rebuilt into section cards with samples and paragraphs, in plain language. Lists update only the affected rows and show their loading state inside the list. A "No root access" screen covers every page.
+- **Bundled tools updated**: ZygiskNext 1.5.2 (now from the LSPosed repository), HMA-OSS oss-173, Thor 1.97.1 and a fresh Duck Detector; Swift Backup was dropped from the HMA template.
+- **Upgrade notes**: with TEESimulator an entry without a user number covers only the main user. The first pool update rebuilds fingerprints with the correct API levels and drops API 36+ models. If you applied a fingerprint by hand before, Random Selection starts off and the module keeps that model. Target List import accepts only IntegrityBox JSON.
+
 > Release Date: 11/10/2026
 
 #### 🛠️ IntegrityBox Ultimate v42.7
