@@ -2,31 +2,19 @@
     {
         "file":  "fg1.json",
         "status":  3,
-        "updated":  "2026-10-28T22:52:06Z",
+        "updated":  "2026-10-30T18:10:42Z",
         "hash":  "1e909076f585f666151e6469aea36986ecbddff8fe7c9981dad3317036b84dac"
     },
     {
         "file":  "fg2.json",
         "status":  3,
-        "updated":  "2026-10-28T22:52:06Z",
+        "updated":  "2026-10-30T18:10:42Z",
         "hash":  "daa9fdc59e3320d54b16b07354642bd9b825a5dd7d9bfb01fdf911462da8912e"
     },
     {
         "file":  "fg3.json",
         "status":  3,
-        "updated":  "2026-10-28T22:52:06Z",
+        "updated":  "2026-10-30T18:10:42Z",
         "hash":  "75a0dbae4be799709965e4d95c2ee7de6ea862244587e8d3d71e2258f9c27468"
-    },
-    {
-        "file":  "fg4.json",
-        "status":  3,
-        "updated":  "2026-10-28T22:52:06Z",
-        "hash":  "aba0f921b705f97d04a11603ff79084295879ae351813908144ad894b5e8f2ee"
-    },
-    {
-        "file":  "fg5.json",
-        "status":  3,
-        "updated":  "2026-10-28T22:52:06Z",
-        "hash":  "e6f7c5d54b9437f3c8576771b6c27a3872248e1979f3a96de8fe82fe07b9046e"
     }
 ]

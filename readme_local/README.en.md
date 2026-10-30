@@ -35,27 +35,31 @@
 
 ### ✨ Highlights
 * ️ **Play Integrity in one place:** manage PIF, Keybox, Target List, Boot Hash, and Security Patch without stacking multiple conflicting modules.
-* 🔑 **Keybox Hub:** cloud Keybox catalog, cached fallback, local XML import from `/sdcard/Download` and `/sdcard/Documents`, active Keybox selection, and state checks in **Integrity Checker**. The freshest published **non-revoked** cloud Keybox always takes priority and supersedes a manual pin; the manual pin only applies when the cloud is unreachable.
-* 🚫 **Keybox revocation checks:** keyboxes are matched against Google's certificate revocation list, and each one is tagged **ACTUAL / REVOKED / UNCHECKED**. A revoked key is no longer treated as usable: the engine switches to the next actual keybox on its own, and if *all* candidates are revoked it keeps the current one applied (a revoked key still passes for a few days until GMS syncs the ban) and switches as soon as an actual keybox appears. Only the public bulk list is used — downloaded, matched locally, discarded — so your specific key is never sent anywhere and cannot accelerate its own ban.
-* 🧬 **Fingerprint Selector:** built-in profile pool, scheduled PIF updates/application, manual Action refresh, and visible source information for the active profile.
-* 🎯 **Target Box:** automatic Target List generation, protected Manual mode, import and backup, plus per-app Default/AOSP/Private profiles and AUTO/GENERATE/LEAF modes.
-* 🗓️ **Security Patch:** automatic patch-date detection from PIF plus manual override through a date picker.
-* 🔓 **Boot Hash Spoofer:** extract the real device Boot Hash and apply a manual override for apps that check bootloader or VBMeta state.
+* 🛰 **Device RKP key:** on supported devices (Android ARM64, verified on Qualcomm) the module obtains the phone's own RKP key from Google and applies it in SLOT 1 instead of a pool Keybox. The key is checked for revocation and certificate dates, AutoPilot issues a new one when it expires, and a pool keybox is applied if issuance fails.
+* 🔑 **Keybox Loader:** online Keybox catalog, cached fallback, local XML import from `/sdcard/Download` and `/sdcard/Documents`, active key selection, and state checks in **Integrity Checker**. A manual choice keeps priority while the key stays in the catalog, its certificates are valid and no revocation is found; otherwise the module takes the freshest actual key.
+* 🚫 **Keybox revocation and expiry checks:** keyboxes are matched against Google's certificate revocation list, and certificate dates are checked offline. Each Keybox is tagged **ACTUAL / REVOKED / EXPIRED / UNCHECKED**; revoked and expired keys leave automatic selection. If no usable key is left, the current one stays applied (a revoked key still passes for a few days until GMS syncs the ban) and is replaced as soon as an actual keybox appears. Only the public bulk list is used — downloaded, matched locally, discarded — so your specific key is never sent anywhere and cannot accelerate its own ban.
+* 🧩 **All common attestation backends:** TrickyStore, TrickyStoreOSS, qwq233's TrickyStore, TEESimulator (v1–v3, RS and v4) and OhMyKeymint run through their own drivers. The WebUI shows only the settings the installed backend supports, and switching backends carries the app list, Keybox and patch date over offline.
+* 👥 **Multiple Android users:** Target Box, Spoof Apps and App Data Cleaner work with work profiles, app clones and private spaces — per user or for every user at once.
+* 🧬 **Fingerprint Selector:** a pool of 5 random Pixel models with their real API levels, a **Random Selection** switch or a held model, scheduled updates and manual profile application. Pixel 10 and later are left out of the pool, as they need an RKP-issued keybox.
+* ⚙️ **Hook-free spoofing engine:** system properties are replaced in private copies of the property areas instead of hooking system functions (KOWX712's inject_s architecture). Supports arm64, armeabi-v7a, x86_64 and Android 17.
+* 🎯 **Target Box:** automatic Target List generation from the cloud template, protected Manual mode, JSON import with a change preview, and backups. When the backend supports it, apps get an attestation profile and mode; TEESimulator v4 sets PATCH or GENERATE per app.
+* 🗓️ **Security Patch:** patch date from the Fingerprint profile, a custom date from the date picker, or the firmware's stock patch. In spoof mode the system, vendor and boot levels get the same date in attestation.
+* 🔓 **Boot Hash Spoofer:** extract the real device Boot Hash and replace it with the saved value for apps that check bootloader or VBMeta state. The VBMeta size, hash algorithm and AVB version stay as the bootloader reports them.
 * 🛡️ **TEE / Widevine tools:** TEE state diagnostics, hardware-attestation backend support, and Widevine L1 repair attempts on supported devices.
 * 🧹 **Spoof ROM Props:** automatic and manual cleanup for 30+ Custom ROM traces: LineageOS, crDroid, Evolution X, DerpFest, RisingOS, AOSPA, PixelExperience, Pixel, GrapheneOS, CalyxOS, PixelOS, ArrowOS, StatiX, and more (Generic covers the rest).
-* 🎭 **Spoof Apps:** targeted device-fingerprint and property spoofing for individual third-party apps — beyond GMS and Play Store. Useful for apps that check `Build` fields locally, bypassing the Play Integrity verdict.
-* 🕶️ **Root-environment hiding:** HideMyApplist template, suspicious-file hiding, TWRP/Fox/Magisk trace cleanup, and Anti-Detection Nuke.
+* 🎭 **Spoof Apps:** targeted Fingerprint and property spoofing for individual third-party apps — beyond GMS and Play Store. Useful for apps that check `Build` fields locally, bypassing the Play Integrity verdict. Apps protected by PairIP, which spoofing breaks, are excluded automatically.
+* 🕶️ **Root-environment hiding:** HideMyApplist template for HMA, HMAL and HMA-OSS, suspicious-file hiding, TWRP/Fox/Magisk trace cleanup, **Hide Extra Managers**, and Anti-Detection Nuke. The module never creates system properties the firmware does not define.
 * 🧰 **GMS Tools:** soft-restart Google Play Services/Play Store together with a GMS cache drop, including the DroidGuard verdict cache — without it a restart replays the old result and a spoofing change looks like it never applied. Plus Google Wallet data reset and a deep GMS/Play Store/GSF wipe to re-prepare the device for a fresh Play Store check.
-* 🧼 **App Data Cleaner:** clear data and cache for individually selected apps, system packages included — handy after changing HMA, a Target profile, props, or Boot Hash, so the app re-checks the environment. Packages whose full wipe could reset every system setting, kill mobile connectivity or bootloop the device are locked out of accidental erasure; clearing *cache* stays available for every package.
-* 🤖 **AutoPilot:** scheduled background maintenance for Keybox, PIF, Target Box, and security patches. The schedule is anchored to a fixed grid, so the cycle no longer creeps into the night, and a refresh that lands while offline is retried every hour until connectivity returns, instead of being burned for a full day.
+* 🧼 **App Data Cleaner:** clear data and cache for individually selected apps, system packages included — handy after changing HMA, a Target profile, props, or Boot Hash, so the app re-checks the environment. Packages whose full wipe could reset every system setting, kill mobile connectivity or bootloop the device are locked out of accidental erasure; clearing *cache* stays available for every package. Cleaning runs in the selected Android user.
+* 🤖 **AutoPilot:** scheduled background maintenance for Keybox, the RKP key, PIF, Target Box, and security patches. The schedule is anchored to a fixed grid, so the cycle no longer creeps into the night, and a refresh that lands while offline is retried every hour until connectivity returns, instead of being burned for a full day.
 * 📦 **Integrity Downloader:** selectable APK/ZIP/JSON downloads directly from WebUI.
 * 📊 **Integrity Checker and Help Center:** active Keybox, PIF, TEE, Target Box, companion modules, network state, and diagnostic report export.
-* 🎨 **Modern WebUI:** Material You interface, Quick Access, localization, built-in module guides, and AI Assistant.
+* 🎨 **Modern WebUI:** Material You interface, a home page of 7 purpose-based sections with tile search, Quick Access, localization, built-in module guides, and AI Assistant.
 
 ### 🧭 Quick Navigation
 * **Installing for the first time?** Start with [Installation & Ultimate Setup Guide](#-installation--ultimate-setup-guide).
 * **Not sure what must be removed first?** See [Conflicting modules](#️-conflicting-modules-to-remove-or-disable).
-* **Need Tricky Store, Zygisk, HMA, or other tools?** See [Core Requirements](#-core-requirements), [Optional, but highly recommended](#-optional-but-highly-recommended), and [Integrity Downloader](#-useful-tools-from-integrity-downloader).
+* **Need an attestation backend, Zygisk, HMA, or other tools?** See [Core Requirements](#-core-requirements), [Optional, but highly recommended](#-optional-but-highly-recommended), and [Integrity Downloader](#-useful-tools-from-integrity-downloader).
 * **Want manual control over Target List?** See [Automatic and Manual Target List Control](#-automatic-and-manual-target-list-control).
 * **Something fails or an app detects root?** See [Quick Troubleshooting](#️-quick-troubleshooting).
 
@@ -74,9 +78,9 @@ For comfortable use and maximum stealth, make sure the environment is built with
 
    Use only **one** root solution at a time. Do not mix Magisk / Kitsune, KernelSU Next, SukiSU Ultra, and APatch in the same system unless you fully understand the consequences.
 
-2. **Hardware attestation backend.** Install [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases/latest) or [**TEE Simulator**](https://github.com/JingMatrix/TEESimulator/releases/latest) if apps check hardware-backed keys and TEE / KeyMint attestation.
+2. **Hardware attestation backend.** Install one of the supported backends: [**TrickyStore**](https://github.com/5ec1cff/TrickyStore/releases/latest), [**TrickyStoreOSS**](https://github.com/beakthoven/TrickyStoreOSS/releases/latest), [**qwq233's TrickyStore**](https://github.com/qwq233/TrickyStore/releases/latest), [**TEESimulator**](https://github.com/JingMatrix/TEESimulator/releases/latest), [**TEESimulator-RS**](https://github.com/Enginex0/TEESimulator-RS/releases/latest), or [**OhMyKeymint**](https://github.com/qwq233/OhMyKeymint/releases/latest). The module detects the installed backend at installation and on every boot and shows only the settings it supports. Without a backend the module applies nothing, and the status shows the backend as `UNDEFINED`.
 
-   Use only **one** attestation backend. Tricky Store, TrickyStoreOSS, TEE Simulator, and their forks must not run at the same time.
+   Use only **one** attestation backend. The listed backends and their forks must not run at the same time.
 
 3. **WebUI.** To open the control panel, install [**MMRL**](https://github.com/MMRLApp/MMRL/releases/latest), [**WebUI X Portable**](https://github.com/MMRLApp/WebUI-X-Portable/releases/latest), or use built-in WebUI support in your Root Manager.
 
@@ -97,7 +101,7 @@ For comfortable use and maximum stealth, make sure the environment is built with
 <ul>
   <li><b>🧬 Play Integrity / DroidGuard spoofers:</b> PlayIntegrityFix / PIF, Play Integrity Fix Next / PlayIntegrityFix-NEXT, Play Integrity Fork / PIFork, PlayIntegritySuperFork, Play Integrity Fix Advanced, Strong Integrity Fix, SafetyNet Fix, Universal SafetyNet Fix, Displax SafetyNet Fix, and other PIF/SafetyNet forks.</li>
   <li><b>🧰 All-in-one Integrity / Keybox solutions:</b> Integrity-Box, Integrity Box forks, old IntegrityBox builds, Tricky Addon, Tricky Addon Enhanced / Update Target List, and similar modules if they manage keybox, target.txt, security patch, VBHash, or GMS state on their own.</li>
-  <li><b>🔑 Key attestation / Keybox backend:</b> do not keep Tricky Store, TrickyStoreOSS, TEE Simulator, TEESimulator-RS, and their forks enabled at the same time. Leave only the backend selected for IntegrityBox Ultimate.</li>
+  <li><b>🔑 Key attestation / Keybox backend:</b> do not keep TrickyStore, TrickyStoreOSS, qwq233's TrickyStore, TEESimulator, TEESimulator-RS, OhMyKeymint, and their forks enabled at the same time. Leave only the backend selected for IntegrityBox Ultimate.</li>
   <li><b>🧾 Build props / fingerprint / security patch spoofers:</b> MagiskHide Props Config, Sensitive Props, Pixel Props / build.prop, Build-Prop-BETA, PixelFlasher PIF helper, XiaomiEU Injected PIF, and any ROM-bundled PIF / Pixel props spoof.</li>
   <li><b>📱 Pixel spoofing modules:</b> Pixelify, Pixelify Next, Pix3lify, Pixel Features, Google Photos Unlimited Backup, and similar modules if they change <code>ro.product*</code>, fingerprint, model, brand, security patch, or GMS properties.</li>
   <li><b>🧱 VBMeta / boot hash spoofers:</b> Android VBMeta Fixer, VBMeta Disguiser, and similar tools if IntegrityBox Ultimate Boot Hash / verifiedBootHash / VBMeta features are used at the same time.</li>
@@ -111,7 +115,7 @@ For comfortable use and maximum stealth, make sure the environment is built with
 
 ## ➕ Optional, but highly recommended
 
-1. [**Zygisk Next**](https://github.com/Dr-TSNG/ZygiskNext/releases/latest) or [**ReZygisk**](https://github.com/PerformanC/ReZygisk/releases/latest) *(needed for Zygisk-based features unless you use the standalone Zygiskless Pixel Mode)*.
+1. [**Zygisk Next**](https://github.com/Dr-TSNG/ZygiskNext/releases/latest) or [**ReZygisk**](https://github.com/PerformanC/ReZygisk/releases/latest) *(needed for Zygisk-based features unless you use Zygiskless Mode)*.
 2. [**LSPosed / Vector**](https://github.com/JingMatrix/Vector/releases/latest) and [**HideMyApplist / HMA-OSS**](https://github.com/frknkrc44/HMA-OSS/releases/latest) *(recommended when banking or government apps react to app lists, root traces, or installed modules)*. Alternative HMA branch: [**Hide-My-Applist**](https://github.com/Dr-TSNG/Hide-My-Applist/releases/latest).
 3. **SUSFS** *(optional, for maximum stealth).* An extra kernel-level hiding layer on top of SukiSU Ultra or KernelSU Next. Not required for the module to work, but it strengthens anti-detection against the strictest checks. It needs more than the Manager APK: a kernel / AnyKernel3 / boot image with SUSFS patches already built in for your exact device, Android version, kernel branch, and firmware; after flashing such a kernel, install the userspace module [**susfs4ksu / SUSFS-FOR-KERNELSU**](https://github.com/sidex15/susfs4ksu-module/releases/latest). Simply patching `boot.img`/`init_boot.img` through a Manager gives root but does not guarantee SUSFS: without patches in the kernel, the `susfs4ksu` module cannot enable kernel-level hiding.
 
@@ -171,18 +175,19 @@ For a clean setup and the best chance of restoring Play Store certification, fol
 
 1. ✅ **Install Dependencies:** Make sure your Root Manager is installed and only one hardware attestation backend is selected.
 2. 📲 **Flash IntegrityBox Ultimate:** Install the module zip. During installation, the module prepares metamodule compatibility and stops old background workers from the previous version.
-3. 🧭 **Choose setup behavior:** If prompted **"Erase previous installation data?"** — press **Vol Up** to reset or **Vol Down** to keep existing settings. On a clean install, you will also see the first-run setup mode prompt: **Vol Up** selects Manual mode with confirmation for advanced stages, **Vol Down** or timeout selects Auto mode with default values.
-4. 🔄 **Reboot your device.** On first boot, the module performs initial setup: baseline safe defaults, Target Box, PIF, Keybox, Boot Hash, Security Patch, AutoPilot, and service profiles. In Manual mode, additional stages are confirmed separately to avoid overwriting user settings without permission.
-5. ▶️ **Run the main action:** Open your Root Manager's module list and tap **Action** on the IntegrityBox Ultimate card. Right after boot the module may still be running first-boot background tasks, so **Action** can fail to start right away and show a message that another operation is already in progress — if that happens, wait a couple of minutes and try again. Wait until it finishes: it will refresh Keybox data, check PIF/Target schedules, and run only the stages that are actually needed.
-6. 🔎 **Check the result:** Open WebUI → **Toolkit** → **Integrity Checker**. For the active Keybox check **both axes**: availability — the status should be `ONLINE`; and actuality — the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at once (synced from the cloud but banned by Google) — if so, refresh it via **Keybox Hub** → **Keybox Loader** → **Sync & Apply Keybox**. Also confirm the page correctly shows PIF source, Target Box, TEE, and companion modules.
-7. 🧼 **Deep Clean GMS:** Go to **Play Integrity Fix** → **GMS Tools** and run **Deep GMS Wipe**. This removes old Google certification states and Google Services Framework data. Reboot when prompted. *(You will be logged out of your Google Account.)*
-8. ✅ **Re-login & Verify:** After rebooting, open the Play Store, log back into your Google account, and check your Play Protect certification status.
-9. 🤖 **Check AutoPilot:** Go to **Auto Pilot** → **AutoPilot Manager** — the daemon should already be running in Xtreme mode. Switch to **Keybox Only** if you prefer minimal system impact.
-10. 🧹 **Custom ROM Props if needed:** If your device runs a custom ROM, open **Detection** → **Spoof ROM Props** and enable **Auto Mode** — the module will scan for ROM-family traces and enable the matching cleanup cards automatically.
-11. 📦 **Export a diagnostic package if needed:** If certification or apps are still unstable, open **Help Center** → **Export Report**. The archive will be saved to `/sdcard/IntegrityBox/Reports`.
+3. 🧭 **Choose setup behavior:** If data from a previous installation is found, press **Vol Up** to erase it or **Vol Down** to keep existing settings. On a clean install or after erasing, you will see the first-run setup mode prompt: **Vol Up** selects Manual mode with confirmation for every step, **Vol Down** or timeout selects Auto mode.
+4. ⚙️ **First-run setup during installation:** In Auto mode the installer itself turns off the ROM's built-in spoofing (if the ROM has none, the marker is dropped at boot), switches SELinux to Enforcing, extracts Boot Hash, optimizes the Zygisk provider, builds the Target List for the backend, enables Banking Mode, runs Nuke, repairs Widevine L1 if needed, and enables AutoPilot in Xtreme mode. The HMA template is offered separately even in Auto mode, so your HMA profile is never overwritten without confirmation. In Manual mode every step is confirmed separately.
+5. 🔄 **Reboot your device.** Until the first **Action** run the module works with the bundled Keybox and PIF.
+6. ▶️ **Run the main action:** Open your Root Manager's module list and tap **Action** on the IntegrityBox Ultimate card. Right after boot the module may still be running first-boot background tasks, so **Action** can fail to start right away and show a message that another operation is already in progress — if that happens, wait a couple of minutes and try again. Wait until it finishes: it refreshes Keybox and PIF, and on a suitable device it turns on device RKP key generation. A manual **Action** always refreshes, ignoring the timers.
+7. 🔎 **Check the result:** Open WebUI → **Module Control** → **Integrity Checker**. For the **Active Keybox** check **both axes**: the source — `ONLINE` for a cloud key or `Device RKP` for the device RKP key; and actuality — the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at once (synced from the cloud but banned by Google) — if so, refresh it via **Attestation Setup Tools** → **Keybox Loader** → **Sync & Apply Keybox**. Also confirm the page correctly shows PIF source, Target Box, TEE, and companion modules.
+8. 🧼 **Deep Clean GMS:** Go to **Reset & Cleanup** → **GMS Tools** and run **Deep GMS Wipe**. This removes old Google certification states and Google Services Framework data. Reboot when prompted. *(You will be logged out of your Google Account.)*
+9. ✅ **Re-login & Verify:** After rebooting, open the Play Store, log back into your Google account, and check your Play Protect certification status.
+10. 🤖 **Check AutoPilot:** Go to **Module Control** → **AutoPilot Manager** — the daemon should already be running in Xtreme mode. Switch to **Keybox Only** if you prefer minimal system impact. Keep AutoPilot on so the RKP key is renewed.
+11. 🧹 **Custom ROM Props if needed:** If your device runs a custom ROM, open **Advanced System Settings** → **Spoof ROM Props** and enable **Auto Mode** — the module will scan for ROM-family traces and enable the matching cleanup cards automatically.
+12. 📦 **Export a diagnostic package if needed:** If certification or apps are still unstable, open **Help & Support** → **Help Center** → **Export Report**. The archive will be saved to `/sdcard/IntegrityBox/Reports`.
 
 > [!NOTE]
-> Boot Hash and Widevine L1 can be configured automatically during first setup or confirmed manually in Manual mode. To adjust Boot Hash later — open **Detection** → **Boot Hash Spoofer**. To re-run Widevine L1 repair — use **Keybox Hub** → **Fix Widevine L1**.
+> Boot Hash and Widevine L1 are configured automatically during installation in Auto mode or confirmed manually in Manual mode. To adjust Boot Hash later — open **Advanced System Settings** → **Boot Hash Spoofer**. To re-run Widevine L1 repair — use **Attestation Setup Tools** → **Fix Widevine L1**.
 
 > [!IMPORTANT]
 > Do not tap **Action** repeatedly. Critical operations are protected from duplicate execution, but it is still better to wait for the current cycle to finish: a repeated run can be skipped as an already active operation.
@@ -196,24 +201,24 @@ For users who need banking or government apps to see a cleaner device, we recomm
 > [!NOTE]
 > In most cases, you do not need to open HMA manually before injecting the profile: IntegrityBox Ultimate attempts to create the required data directories and write the configuration automatically. If automatic injection fails, open HMA once, close it, and run **Inject HMA Template** again.
 
-1. 📥 **Download Tools:** Open WebUI -> **Miscellaneous** -> **Module Settings**. Toggle **Integrity Downloader** ON and tap **Apply Changes**. In the dialog, select the tools you need with checkboxes. For the HMA scenario, you usually need **LSPosedVector.zip**, **HMA_OSS.zip**, and **HMA_Config.json**. Downloaded files will be saved to `/sdcard/IntegrityBox/Downloads`.
+1. 📥 **Download Tools:** Open WebUI -> **Module Control** -> **Module Settings**. Toggle **Integrity Downloader** ON and tap **Apply Changes**. In the dialog, select the tools you need with checkboxes. For the HMA scenario, you usually need **LSPosedVector.zip**, **HMA_OSS.zip**, and **HMA_Config.json**. Downloaded files will be saved to `/sdcard/IntegrityBox/Downloads`.
 2. 🧩 **Install LSPosed / Vector:** Flash `/sdcard/IntegrityBox/Downloads/LSPosedVector.zip` in your Root Manager and reboot your device.
 3. 🕵️ **Install HMA:** Flash `/sdcard/IntegrityBox/Downloads/HMA_OSS.zip` in your Root Manager, reboot, and enable HideMyApplist in LSPosed.
-4. 🛡️ **Inject the HMA profile:** Open WebUI -> **Hide My Stuff** -> **Inject HMA Template**. This applies ready-made hiding rules for many banking and government apps directly into HMA.
+4. 🛡️ **Inject the HMA profile:** Open WebUI -> **Advanced Masking** -> **Inject HMA Template**. This applies ready-made hiding rules for many banking and government apps directly into HMA, HMAL, or HMA-OSS. With several variants installed, the module asks which one to replace and takes a backup before writing.
 5. 🧰 **Manual HMA import fallback:** If automatic injection fails, open the HMA app and manually import `/sdcard/IntegrityBox/Downloads/HMA_Config.json` through HMA's import/restore configuration flow.
 6. 📱 **Install PixelMask for Google Photos features:** PixelMask can unlock selected Pixel features for Google Photos on your phone. Depending on the selected profile, this may include unlimited Original-quality photo and video backup or Pixel-only features such as Video Boost, Night Sight Video, Add Me, Reimagine, and Magic Editor.
 
 #### For maximum stealth and anti-detection, use these tools according to the symptoms
 
-1. 🏦 **Banking Mode:** Open **Toolkit** -> **Utility Box** and enable **Banking Mode**. It hides ADB/debug state and sets `sys.oem_unlock_allowed=0`.
-2. 🛡️ **SELinux Enforcing:** On the home page, open **Cleanup & SELinux** -> **Enforce SELinux** and make sure the module status shows SELinux as `Enforcing`.
-3. 🧩 **Strict Zygisk/Shamiko isolation:** Use **Zygisk Providers & Shamiko** -> **Enable Whitelist Mode** to enable strict isolation. Configure the app list separately in your Root Manager's DenyList or in the ZygiskNext/Shamiko settings.
-4. ⚙️ **Optimize Zygisk provider:** Tap **Zygisk Providers & Shamiko** -> **Optimize Zygisk Provider** if you use Zygisk Next or a supported fork. The module applies recommended controller stealth settings.
-5. 🧰 **Anti-detection flags:** In **Miscellaneous** → **Module Settings**, enable only what you actually need: **Debug Fingerprint**, **Debug Build**, **Build Tag**, **Clear LSposed**, **Spoof Encryption**, **Hide Recovery**, **Clear Gapps Logs**, and **Archive Manager Logs**. For ROM trace cleanup, use **Detection** → **Spoof ROM Props**.
-6. 🗂️ **Hide suspicious files:** Use **Hide My Stuff** -> **Hide Suspicious Files** if an app sees `TWRP`, `Fox`, `Magisk`, root managers, or old traces on `/sdcard`. Do not add random system paths.
-7. 🧹 **Reset the app state:** After changing HMA, Target, props, or Boot Hash, open **Cleanup & SELinux** -> **App Data Cleaner** and clear data/cache for the problematic app so it re-checks the environment.
-8. 🔥 **Anti-Detection Nuke:** Use **Detection** -> **Anti-Detection Nuke** only for clear leftover traces. Start with **Soft Cleanup**, then **Standard Nuke**. Keep **Aggressive Nuke** as the last resort.
-9. 🧪 **System Prop Spoofer:** Use **Detection** -> **System Prop Spoofer** only if you understand which `getprop` traces need to be reset or removed.
+1. 🏦 **Banking Mode:** Open **Advanced System Settings** -> **Utility Box** and enable **Banking Mode**. It turns off developer options, USB and Wi-Fi debugging and the system setting that permits bootloader unlocking in Android settings. Turning Banking Mode off restores only that system setting; turn developer options and debugging back on manually.
+2. 🛡️ **SELinux Enforcing:** On the home page, open **Advanced System Settings** -> **Enforce SELinux** and make sure the module status shows SELinux as `Enforcing`.
+3. 🧩 **Strict Zygisk/Shamiko isolation:** Use **Advanced Masking** -> **Enable Whitelist Mode** to enable strict isolation. Configure the app list separately in your Root Manager's DenyList or in the ZygiskNext/Shamiko settings.
+4. ⚙️ **Optimize Zygisk provider:** Tap **Advanced Masking** -> **Optimize Zygisk Provider** if you use Zygisk Next or a supported fork. The module applies recommended controller stealth settings.
+5. 🧰 **Anti-detection flags:** In **Module Control** → **Module Settings**, enable only what you actually need: **Debug Fingerprint**, **Debug Build**, **Build Tag**, **Clear LSposed**, **Spoof Encryption**, **Hide Recovery**, **Clear Gapps Logs**, **Archive Manager Logs**, and **Hide Extra Managers** (hides the data of inactive root managers when exactly one is active; takes effect after a reboot). For ROM trace cleanup, use **Advanced System Settings** → **Spoof ROM Props**.
+6. 🗂️ **Hide suspicious files:** Use **Advanced Masking** -> **Hide Suspicious Files** if an app sees `TWRP`, `Fox`, `Magisk`, root managers, or old traces on `/sdcard`. Do not add random system paths.
+7. 🧹 **Reset the app state:** After changing HMA, Target, props, or Boot Hash, open **Reset & Cleanup** -> **App Data Cleaner** and clear data/cache for the problematic app so it re-checks the environment.
+8. 🔥 **Anti-Detection Nuke:** Use **Reset & Cleanup** -> **Anti-Detection Nuke** only for clear leftover traces. Start with **Soft Cleanup**, then **Standard Nuke**. Keep **Aggressive Nuke** as the last resort.
+9. 🧪 **System Prop Spoofer:** Use **Advanced System Settings** -> **System Prop Spoofer** only if you understand which `getprop` traces need to be reset or removed.
 
 <details>
 <summary><strong>Detailed System Prop Spoofer table</strong></summary>
@@ -228,6 +233,8 @@ For users who need banking or government apps to see a cleaner device, we recomm
 | Nuke Trash | `*.odex`, `*.vdex`, `base.odex` under `/data/app`. | When a detector reacts to stale odex/vdex artifacts after modules or app updates. |
 
 #### Reset Props
+
+Values are applied only to properties the firmware defines; absent properties are never created. The Global Settings item changes Android settings, not properties.
 
 | UI item | Props / action | Purpose |
 | --- | --- | --- |
@@ -370,13 +377,16 @@ The automatic list includes:
 
 When the active backend confirms a broken TEE, automatic target generation changes AUTO entries to GENERATE. Explicit modes are preserved, and the driver applies the settings according to the backend's capabilities.
 
+Auto-update adds the template apps for every Android user that has them installed: the main user, work profiles, app clones and private spaces. With TEESimulator the list is kept per user; with backends that keep one shared list, an entry applies to every user.
+
 If you want to use your own app list instead of the automatic template:
 
-1. Open WebUI -> **Backend Settings** -> **Target Box**.
-2. Disable **Auto Update Target List** if you want full manual control over Target List.
-3. Use **Import Target** to select an IntegrityBox Target List JSON file through the built-in file picker.
-4. For per-app tuning, enable the app in Target Box, then select the **Default**, **AOSP**, or **Private** profile and the **AUTO**, **GENERATE**, or **LEAF** mode. You can also select several apps and apply one configuration in bulk.
-5. If you enable **Auto Update Target List** again, the module will apply its own rules and refresh the displayed app list from the current Target List.
+1. Open WebUI -> **Attestation Setup Tools** -> **Target Box**.
+2. Disable **Auto-Update Target List** if you want full manual control over Target List.
+3. Use **Import Target** to select an IntegrityBox Target List JSON file through the built-in file picker. Before replacing the list, import shows which settings the current backend keeps, converts to defaults, or skips; a successful import switches to Manual mode. Old TXT lists and native backend configs are not imported.
+4. Above the list, choose **All** or a specific Android user. In **All**, a three-position switch turns an app off for every user, restores the earlier selection, or turns it on for every user, and a "1/4"-style button under the app opens its users.
+5. For per-app tuning, enable the app in Target Box. When the backend supports profiles and modes, select the **Default**, **AOSP**, or **Private** profile and the **AUTO**, **GENERATE**, or **LEAF** mode; TEESimulator v4 sets **PATCH** or **GENERATE** per app. Settings the backend does not support are hidden. When the backend supports bulk setup, you can select several apps and apply one configuration to all of them.
+6. If you enable **Auto-Update Target List** again, the module will apply its own rules and refresh the displayed app list from the current Target List.
 
 > [!NOTE]
 > In automatic mode, Target Box updates by schedule through AutoPilot and when Action runs. Manual mode protects your own Target List from being overwritten. Before changing the file, the module creates a backup, and Target Box state is included in the diagnostic report.
@@ -386,7 +396,8 @@ If you want to use your own app list instead of the automatic template:
 ## 📚 Built-in Knowledge Base
 **IntegrityBox Ultimate includes an interactive Knowledge Base directly inside the WebUI.**
 
-* 💡 **Module Guides:** Tap the lightbulb icon at the top of any module page.
+* 💡 **Module Guides:** Tap the subtitle with the lightbulb icon under the title of any module page.
+* 🔍 **Tile search:** The search field under the home dashboard keeps only the tiles whose title or description contains the typed words.
 * ℹ️ **Feature Details:** Tap the `( i )` buttons next to individual sections.
 * 🤖 **AI Assistant:** An offline built-in assistant is available in the WebUI for common questions and troubleshooting.
 
@@ -397,10 +408,10 @@ If you want to use your own app list instead of the automatic template:
 > Start with the simple checks first: Keybox status, **Restart Services**, then **Deep GMS Wipe** if needed, reboot, and Play Store certification check. Use advanced Target Box modes, Boot Hash Spoofer, and Nuke only when you know which exact check is failing.
 
 ### 🧪 Play Integrity fails
-1. Open WebUI -> **Toolkit** -> **Integrity Checker**.
-2. Check **Active Keybox**. These are **two independent axes** and both matter: availability — the status should be `ONLINE`; and actuality — the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at the same time: synced from the cloud, but banned by Google and about to stop passing.
-3. If the Keybox is missing, the status is not `ONLINE`, or it is flagged `REVOKED`, open WebUI -> **Keybox Hub** -> **Keybox Loader**. Select **Slot 1** at the top *(the primary slot)*, tap **Sync & Apply Keybox**, wait for the list to refresh, then tap a fresh Keybox carrying both the `PROVIDER` badge and the `ACTUAL` tag, and confirm loading it into **Slot 1**. If the cloud list does not appear, check your internet connection and GitHub access. If sync is still unavailable, place your own XML Keybox in `/sdcard/Download` or `/sdcard/Documents`, tap the refresh button, and load the detected `LOCAL` Keybox into **Slot 1**.
-4. After updating the Keybox, run WebUI -> **Play Integrity Fix** -> **GMS Tools** -> **Deep GMS Wipe**, reboot, and check the Play Store again.
+1. Open WebUI -> **Module Control** -> **Integrity Checker**.
+2. Check **Active Keybox**. These are **two independent axes** and both matter: the source — `ONLINE` for a cloud key or `Device RKP` for the device RKP key; and actuality — the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at the same time: synced from the cloud, but banned by Google and about to stop passing. `EXPIRED` means at least one certificate has run out.
+3. If the Keybox is missing, the source is neither `ONLINE` nor `Device RKP`, or the key is flagged `REVOKED` or `EXPIRED`, open WebUI -> **Attestation Setup Tools** -> **Keybox Loader**. On a supported device, turn on **Generate device RKP key** at the top: the module obtains the phone's own key from Google. To use a pool key instead, tap **Sync & Apply Keybox**, wait for the list to refresh, then tap a fresh Keybox carrying both the `PROVIDER` badge and the `ACTUAL` tag, and confirm loading it into **SLOT 1** *(the primary slot; extra slots appear only when the backend supports them)*. Choosing a pool key turns RKP generation off. If the cloud list does not appear, check your internet connection and GitHub access. If sync is still unavailable, place your own XML Keybox in `/sdcard/Download` or `/sdcard/Documents`, tap the refresh button, and load the detected `LOCAL` Keybox into **SLOT 1**.
+4. After updating the Keybox, run WebUI -> **Reset & Cleanup** -> **GMS Tools** -> **Deep GMS Wipe**, reboot, and check the Play Store again.
 
 ### 🛒 Play Store says "Device not certified"
 1. Make sure Play Integrity already passes in **Integrity Checker**.
@@ -408,20 +419,20 @@ If you want to use your own app list instead of the automatic template:
 3. Check the integrity verdict: go back to Play Store **Settings** -> **General** -> **Developer options** -> in the **Play Integrity** section, tap **Check integrity**.
 4. The result should show a passing integrity verdict. For normal Play Store certification, **Device integrity** / `MEETS_DEVICE_INTEGRITY` should pass; for Google Wallet and strict banking apps, **Strong integrity** / `MEETS_STRONG_INTEGRITY` is usually required.
 5. Also check the certification status: **Play Store** -> profile avatar -> **Settings** -> **About** -> **Play Protect certification**. The expected status is **Device is certified**.
-6. If the integrity verdict passes but the Play Store still says **Device is not certified**, open WebUI -> **Play Integrity Fix** -> **GMS Tools** -> **Deep GMS Wipe**.
+6. If the integrity verdict passes but the Play Store still says **Device is not certified**, open WebUI -> **Reset & Cleanup** -> **GMS Tools** -> **Deep GMS Wipe**.
 7. Reboot, open the Play Store, sign in again, and wait a few minutes. Then repeat the integrity and certification checks above.
 
 ### 💳 Google Wallet / GPay fails
 1. First run the built-in Play Integrity check through the Play Store: **Play Store** -> profile avatar -> **Settings** -> **General** -> **Developer options** -> **Play Integrity** -> **Check integrity**. If **Developer options** is not visible, enable it using the previous scenario.
 2. Google Wallet usually requires **Strong integrity** / `MEETS_STRONG_INTEGRITY`. If only **Device integrity** passes, the Play Store may be certified, but Wallet can still reject payments.
-3. **If you have just changed spoofing settings** (profile, fingerprint, **Advanced Spoofing** toggles), start with the light step: WebUI -> **Play Integrity Fix** -> **GMS Tools** -> the **Restart Services** button. It drops the DroidGuard verdict cache that keeps Google Play Services handing Wallet the **old** check result even though the settings already changed. Your cards and account are untouched. This is often enough — try adding a card right after.
-4. If **Strong integrity** does not pass, go back to **Play Integrity fails**: check **Active Keybox** (both the `ONLINE` status and the `ACTUAL` tag), refresh the Keybox through **Keybox Loader**, then run **Deep GMS Wipe** and reboot.
-5. If **Strong integrity** passes but Wallet still fails, open WebUI -> **Play Integrity Fix** -> **GMS Tools** -> the **Clear Wallet Data** button. It wipes Wallet's local state that cached a previous security failure and drops the services cache as well. You will **not** be signed out of your Google account, but you will most likely need to add your cards again.
+3. **If you have just changed spoofing settings** (profile, Fingerprint, **Advanced Spoofing** toggles), start with the light step: WebUI -> **Reset & Cleanup** -> **GMS Tools** -> the **Restart Services** button. It drops the DroidGuard verdict cache that keeps Google Play Services handing Wallet the **old** check result even though the settings already changed. Your cards and account are untouched. This is often enough — try adding a card right after.
+4. If **Strong integrity** does not pass, go back to **Play Integrity fails**: check **Active Keybox** (both the `ONLINE` or `Device RKP` source and the `ACTUAL` tag), refresh the Keybox through **Keybox Loader**, then run **Deep GMS Wipe** and reboot.
+5. If **Strong integrity** passes but Wallet still fails, open WebUI -> **Reset & Cleanup** -> **GMS Tools** -> the **Clear Wallet Data** button. It wipes Wallet's local state that cached a previous security failure and drops the services cache as well. You will **not** be signed out of your Google account, but you will most likely need to add your cards again.
 6. Reboot, open Google Wallet, add your cards again if needed, and test contactless payment.
 
 ### 🏦 A banking app detects root, Xposed, or suspicious apps
 1. Make sure **HideMyApplist / HMA-OSS** is installed, the HMA module is enabled in LSPosed, and the banking app is selected in HMA's LSPosed scope.
-2. If the profile has not been applied yet, open WebUI -> **Hide My Stuff** -> **Inject HMA Template**. This imports the ready-made IntegrityBox configuration into HMA.
+2. If the profile has not been applied yet, open WebUI -> **Advanced Masking** -> **Inject HMA Template**. This imports the ready-made IntegrityBox configuration into HMA.
 3. Open HMA and select the banking app in the list of apps that should see a hidden environment.
 4. Apply the **FlexGAV 5.5** templates and presets to it: the blacklist/template for hidden apps, detector/root/sus-app presets, and settings presets such as accessibility/dev options/input method when available in your HMA build.
 5. Save the HMA configuration, force stop the banking app or reboot, then test the app again.
@@ -430,20 +441,20 @@ If you want to use your own app list instead of the automatic template:
 > [!IMPORTANT]
 > Advanced Target Box profiles are configured per app. Do not apply them to all apps at once.
 
-1. First make sure **Active Keybox** in **Integrity Checker** is `ONLINE`.
-2. Open WebUI -> **Backend Settings** -> **Target Box**.
-3. Find the target app by name or package name.
-4. Enable Target for the app, then select **Default** profile and **AUTO** mode for the first attempt. Changes are saved automatically.
+1. First make sure **Active Keybox** in **Integrity Checker** has an `ONLINE` or `Device RKP` source and the `ACTUAL` tag.
+2. Open WebUI -> **Attestation Setup Tools** -> **Target Box**.
+3. Find the target app by name or package name. If the app is installed in a work profile, a clone or a private space, choose that user or **All** above the list.
+4. Enable Target for the app. When the backend supports profiles and modes, select **Default** profile and **AUTO** mode for the first attempt; with TEESimulator v4, select **PATCH**. Changes are saved automatically.
 5. Force stop the problematic app or reboot, then test it again.
-6. If **AUTO** does not help, try **LEAF** for the same app. Use **GENERATE** only as a last resort when it is clear that the app does not accept the normal attestation chain.
+6. If **AUTO** does not help, try **LEAF** for the same app. Use **GENERATE** only as a last resort when it is clear that the app does not accept the normal attestation chain. With TEESimulator v4, switch the app to **GENERATE** if **PATCH** does not help.
 
 ### 🔓 An app complains about bootloader, VBMeta, or boot hash
-1. Open WebUI -> **Detection** -> **Boot Hash Spoofer**.
+1. Open WebUI -> **Advanced System Settings** -> **Boot Hash Spoofer**.
 2. Tap **Get Real Boot Hash**. The module first checks hardware boot sources: `/proc/cmdline`, device-tree, and `/proc/bootconfig`.
 3. If boot sources do not return a valid hash, the module automatically tries the local Java Key Attestation fallback. You do not need to run it separately.
-4. If the field is filled with a 64-character hash, tap **Apply**, then **Reboot**, and test the app again.
-5. If you see **Extraction Failed**, open **Help Center** -> **Export Report** and save the diagnostic archive: it will include `boot_hash_extract.log` and `boot_hash_attestation.log`.
-6. If the real hash cannot be obtained, use **Magic Wand** only as a fallback: it generates a valid 64-character hash, but it is not the real device value.
+4. If the field is filled with a 64-character hash, tap **Apply**, then **Reboot**, and test the app again. Only the saved digest is replaced, and only when the device reports one; other VBMeta values stay as the bootloader reports them.
+5. If you see "Failed to extract the real hash", open **Help & Support** -> **Help Center** -> **Export Report** and save the diagnostic archive: it will include `boot_hash_extract.log` and `boot_hash_attestation.log`.
+6. If the real hash cannot be obtained, use the **Magic wand** at the right of the input field only as a fallback: it generates a valid 64-character hash, but it is not the real device value.
 7. To roll the change back, return to **Boot Hash Spoofer**, tap **Reset**, and reboot.
 
 ### 📌 Need faster access to common tools
@@ -458,7 +469,8 @@ If you still cannot restore Google certification or get the required apps workin
 The module ZIP already contains readable JS, HTML, CSS, shell scripts, and config files. Separate source folders are provided only for components shipped as compiled binaries:
 
 - `sources/zygisk/` - source code and build notes for native Zygisk libraries from `IntegrityBox-Ultimate-Clnt/zygisk/*.so`.
-- `sources/dex/` - Java source code the bundled `classes.dex` is built from (PIF entry point, provider, and keystore hooks).
+- `sources/dex/` - Java source code the bundled `classes.dex` is built from (DroidGuard entry point, KeyStore provider, and package signature swap).
+- `sources/rkp/` - source code and build notes for `bin/ib-rkp`, which obtains the device RKP key (based on Duck ToolBox, MIT).
 - `sources/boot-hash-attestation/` - source code and build notes for the `boot_attest.jar` helper.
 - `sources/licenses/` - licenses and notices for compiled components.
 
@@ -468,6 +480,8 @@ The module ZIP already contains readable JS, HTML, CSS, shell scripts, and confi
 This project uses concepts and code from the following open-source work:
 - @ez-me for ezme-nodebug.
 - @osm0sis for PlayIntegrityFork.
+- @KOWX712 for the inject_s architecture behind the property spoofing engine.
+- @eltavine for Duck ToolBox, the base of device RKP key issuance.
 - **LSPosed Team** for Shamiko's late start service script.
 - **MeowDump** for the original Integrity-Box foundation.
 - **You**, for using this module.

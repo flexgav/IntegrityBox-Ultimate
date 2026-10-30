@@ -1,0 +1,18 @@
+[package]
+name = "ib-rkp"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+publish = false
+
+[dependencies]
+clap = "4.6.7"
+duck-core = { git = "https://github.com/eltavine/Duck-ToolBox", rev = "019e1fbb5b305c7d9cb6d7b6f01a219c363ea75c" }
+duck-rkp-device = { git = "https://github.com/eltavine/Duck-ToolBox", rev = "019e1fbb5b305c7d9cb6d7b6f01a219c363ea75c" }
+serde_json = "1.0.151"
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
