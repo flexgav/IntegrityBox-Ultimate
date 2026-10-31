@@ -37,9 +37,9 @@
 * ️ **Play Integrity in one place:** manage PIF, Keybox, Target List, Boot Hash, and Security Patch without stacking multiple conflicting modules.
 * 🛰 **Device RKP key:** on supported devices (Android ARM64, verified on Qualcomm) the module obtains the phone's own RKP key from Google and applies it in SLOT 1 instead of a pool Keybox. The key is checked for revocation and certificate dates, AutoPilot issues a new one when it expires, and a pool keybox is applied if issuance fails.
 * 🔑 **Keybox Loader:** online Keybox catalog, cached fallback, local XML import from `/sdcard/Download` and `/sdcard/Documents`, active key selection, and state checks in **Integrity Checker**. A manual choice keeps priority while the key stays in the catalog, its certificates are valid and no revocation is found; otherwise the module takes the freshest actual key.
-* 🚫 **Keybox revocation and expiry checks:** keyboxes are matched against Google's certificate revocation list, and certificate dates are checked offline. Each Keybox is tagged **ACTUAL / REVOKED / EXPIRED / UNCHECKED**; revoked and expired keys leave automatic selection. If no usable key is left, the current one stays applied (a revoked key still passes for a few days until GMS syncs the ban) and is replaced as soon as an actual keybox appears. Only the public bulk list is used — downloaded, matched locally, discarded — so your specific key is never sent anywhere and cannot accelerate its own ban.
-* 🧩 **All common attestation backends:** TrickyStore, TrickyStoreOSS, qwq233's TrickyStore, TEESimulator (v1–v3, RS and v4) and OhMyKeymint run through their own drivers. The WebUI shows only the settings the installed backend supports, and switching backends carries the app list, Keybox and patch date over offline.
-* 👥 **Multiple Android users:** Target Box, Spoof Apps and App Data Cleaner work with work profiles, app clones and private spaces — per user or for every user at once.
+* 🚫 **Keybox revocation and expiry checks:** keyboxes are matched against Google's certificate revocation list, and certificate dates are checked offline. Each Keybox is tagged **ACTUAL / REVOKED / EXPIRED / UNCHECKED**; revoked and expired keys leave automatic selection. If no usable key is left, the current one stays applied (a revoked key still passes for a few days until GMS syncs the ban) and is replaced as soon as an actual keybox appears. Only the public bulk list is used - downloaded, matched locally, discarded - so your specific key is never sent anywhere and cannot accelerate its own ban.
+* 🧩 **All common attestation backends:** TrickyStore, TrickyStoreOSS, qwq233's TrickyStore, TEESimulator (v1-v3, RS and v4) and OhMyKeymint run through their own drivers. The WebUI shows only the settings the installed backend supports, and switching backends carries the app list, Keybox and patch date over offline.
+* 👥 **Multiple Android users:** Target Box, Spoof Apps and App Data Cleaner work with work profiles, app clones and private spaces - per user or for every user at once.
 * 🧬 **Fingerprint Selector:** a pool of 5 random Pixel models with their real API levels, a **Random Selection** switch or a held model, scheduled updates and manual profile application. Pixel 10 and later are left out of the pool, as they need an RKP-issued keybox.
 * ⚙️ **Hook-free spoofing engine:** system properties are replaced in private copies of the property areas instead of hooking system functions (KOWX712's inject_s architecture). Supports arm64, armeabi-v7a, x86_64 and Android 17.
 * 🎯 **Target Box:** automatic Target List generation from the cloud template, protected Manual mode, JSON import with a change preview, and backups. When the backend supports it, apps get an attestation profile and mode; TEESimulator v4 sets PATCH or GENERATE per app.
@@ -47,10 +47,10 @@
 * 🔓 **Boot Hash Spoofer:** extract the real device Boot Hash and replace it with the saved value for apps that check bootloader or VBMeta state. The VBMeta size, hash algorithm and AVB version stay as the bootloader reports them.
 * 🛡️ **TEE / Widevine tools:** TEE state diagnostics, hardware-attestation backend support, and Widevine L1 repair attempts on supported devices.
 * 🧹 **Spoof ROM Props:** automatic and manual cleanup for 30+ Custom ROM traces: LineageOS, crDroid, Evolution X, DerpFest, RisingOS, AOSPA, PixelExperience, Pixel, GrapheneOS, CalyxOS, PixelOS, ArrowOS, StatiX, and more (Generic covers the rest).
-* 🎭 **Spoof Apps:** targeted Fingerprint and property spoofing for individual third-party apps — beyond GMS and Play Store. Useful for apps that check `Build` fields locally, bypassing the Play Integrity verdict. Apps protected by PairIP, which spoofing breaks, are excluded automatically.
+* 🎭 **Spoof Apps:** targeted Fingerprint and property spoofing for individual third-party apps - beyond GMS and Play Store. Useful for apps that check `Build` fields locally, bypassing the Play Integrity verdict. Apps protected by PairIP, which spoofing breaks, are excluded automatically.
 * 🕶️ **Root-environment hiding:** HideMyApplist template for HMA, HMAL and HMA-OSS, suspicious-file hiding, TWRP/Fox/Magisk trace cleanup, **Hide Extra Managers**, and Anti-Detection Nuke. The module never creates system properties the firmware does not define.
-* 🧰 **GMS Tools:** soft-restart Google Play Services/Play Store together with a GMS cache drop, including the DroidGuard verdict cache — without it a restart replays the old result and a spoofing change looks like it never applied. Plus Google Wallet data reset and a deep GMS/Play Store/GSF wipe to re-prepare the device for a fresh Play Store check.
-* 🧼 **App Data Cleaner:** clear data and cache for individually selected apps, system packages included — handy after changing HMA, a Target profile, props, or Boot Hash, so the app re-checks the environment. Packages whose full wipe could reset every system setting, kill mobile connectivity or bootloop the device are locked out of accidental erasure; clearing *cache* stays available for every package. Cleaning runs in the selected Android user.
+* 🧰 **GMS Tools:** soft-restart Google Play Services/Play Store together with a GMS cache drop, including the DroidGuard verdict cache - without it a restart replays the old result and a spoofing change looks like it never applied. Plus Google Wallet data reset and a deep GMS/Play Store/GSF wipe to re-prepare the device for a fresh Play Store check.
+* 🧼 **App Data Cleaner:** clear data and cache for individually selected apps, system packages included - handy after changing HMA, a Target profile, props, or Boot Hash, so the app re-checks the environment. Packages whose full wipe could reset every system setting, kill mobile connectivity or bootloop the device are locked out of accidental erasure; clearing *cache* stays available for every package. Cleaning runs in the selected Android user.
 * 🤖 **AutoPilot:** scheduled background maintenance for Keybox, the RKP key, PIF, Target Box, and security patches. The schedule is anchored to a fixed grid, so the cycle no longer creeps into the night, and a refresh that lands while offline is retried every hour until connectivity returns, instead of being burned for a full day.
 * 📦 **Integrity Downloader:** selectable APK/ZIP/JSON downloads directly from WebUI.
 * 📊 **Integrity Checker and Help Center:** active Keybox, PIF, TEE, Target Box, companion modules, network state, and diagnostic report export.
@@ -115,7 +115,7 @@ For comfortable use and maximum stealth, make sure the environment is built with
 
 ## ➕ Optional, but highly recommended
 
-1. [**Zygisk Next**](https://github.com/Dr-TSNG/ZygiskNext/releases/latest) or [**ReZygisk**](https://github.com/PerformanC/ReZygisk/releases/latest) *(needed for Zygisk-based features unless you use Zygiskless Mode)*.
+1. [**Zygisk Next**](https://github.com/Dr-TSNG/ZygiskNext/releases/latest) or [**ReZygisk**](https://github.com/PerformanC/ReZygisk/releases/latest), or their forks *(needed for Zygisk-based features unless you use Zygiskless Mode)*.
 2. [**LSPosed / Vector**](https://github.com/JingMatrix/Vector/releases/latest) and [**HideMyApplist / HMA-OSS**](https://github.com/frknkrc44/HMA-OSS/releases/latest) *(recommended when banking or government apps react to app lists, root traces, or installed modules)*. Alternative HMA branch: [**Hide-My-Applist**](https://github.com/Dr-TSNG/Hide-My-Applist/releases/latest).
 3. **SUSFS** *(optional, for maximum stealth).* An extra kernel-level hiding layer on top of SukiSU Ultra or KernelSU Next. Not required for the module to work, but it strengthens anti-detection against the strictest checks. It needs more than the Manager APK: a kernel / AnyKernel3 / boot image with SUSFS patches already built in for your exact device, Android version, kernel branch, and firmware; after flashing such a kernel, install the userspace module [**susfs4ksu / SUSFS-FOR-KERNELSU**](https://github.com/sidex15/susfs4ksu-module/releases/latest). Simply patching `boot.img`/`init_boot.img` through a Manager gives root but does not guarantee SUSFS: without patches in the kernel, the `susfs4ksu` module cannot enable kernel-level hiding.
 
@@ -126,21 +126,21 @@ For comfortable use and maximum stealth, make sure the environment is built with
 
 Current list from `assets/tools.list`:
 
-* **ZygiskNext.zip** — current Zygisk Next for Root Managers without built-in Zygisk.
-* **TrickyStore.zip** — hardware attestation backend (original, 5ec1cff).
-* **TrickyStore_OSS.zip** — the same backend, an actively maintained FOSS fork (beakthoven). Installed instead of the original, not alongside it (same `tricky_store` module id).
-* **KeyAttestation.apk** — app for manual certificate and verdict checks.
-* **UpdateLocker.apk** — LSPosed module for blocking unwanted app updates.
-* **HMA_Config.json** — ready-made IntegrityBox profile for HideMyApplist.
-* **HMA_OSS.zip** — current HideMyApplist OSS build (flashed in the Root Manager).
-* **PixelMask.apk** — LSPosed module for Pixel/GMS scenarios.
-* **KSU_WebUI.apk** — standalone WebUI app for devices where the Root Manager does not open WebUI directly.
-* **Core_Patch.apk** — LSPosed module for system install/signature restrictions.
-* **Thor_Installer.apk** — manager/installer for additional Android tools.
-* **Android_Faker.apk** — utility for manual Android identifier checks and setup.
-* **LSPosedVector.zip** — LSPosed / Vector for HMA and other LSPosed modules.
-* **Duck_Detector.apk** — root/Xposed/Magisk detector with native checks; useful for diagnosing what the root environment exposes.
-* **Native_Root_Detector.apk** — native root detector showing exactly what apps can see during low-level environment scanning.
+* **ZygiskNext.zip** - current Zygisk Next for Root Managers without built-in Zygisk.
+* **TrickyStore.zip** - hardware attestation backend (original, 5ec1cff).
+* **TrickyStore_OSS.zip** - the same backend, an actively maintained FOSS fork (beakthoven). Installed instead of the original, not alongside it (same `tricky_store` module id).
+* **KeyAttestation.apk** - app for manual certificate and verdict checks.
+* **UpdateLocker.apk** - LSPosed module for blocking unwanted app updates.
+* **HMA_Config.json** - ready-made IntegrityBox profile for HideMyApplist.
+* **HMA_OSS.zip** - current HideMyApplist OSS build (flashed in the Root Manager).
+* **PixelMask.apk** - LSPosed module for Pixel/GMS scenarios.
+* **KSU_WebUI.apk** - standalone WebUI app for devices where the Root Manager does not open WebUI directly.
+* **Core_Patch.apk** - LSPosed module for system install/signature restrictions.
+* **Thor_Installer.apk** - manager/installer for additional Android tools.
+* **Android_Faker.apk** - utility for manual Android identifier checks and setup.
+* **LSPosedVector.zip** - LSPosed / Vector for HMA and other LSPosed modules.
+* **Duck_Detector.apk** - root/Xposed/Magisk detector with native checks; useful for diagnosing what the root environment exposes.
+* **Native_Root_Detector.apk** - native root detector showing exactly what apps can see during low-level environment scanning.
 
 ## 📁 Where to find files downloaded by Integrity Downloader
 
@@ -178,16 +178,16 @@ For a clean setup and the best chance of restoring Play Store certification, fol
 3. 🧭 **Choose setup behavior:** If data from a previous installation is found, press **Vol Up** to erase it or **Vol Down** to keep existing settings. On a clean install or after erasing, you will see the first-run setup mode prompt: **Vol Up** selects Manual mode with confirmation for every step, **Vol Down** or timeout selects Auto mode.
 4. ⚙️ **First-run setup during installation:** In Auto mode the installer itself turns off the ROM's built-in spoofing (if the ROM has none, the marker is dropped at boot), switches SELinux to Enforcing, extracts Boot Hash, optimizes the Zygisk provider, builds the Target List for the backend, enables Banking Mode, runs Nuke, repairs Widevine L1 if needed, and enables AutoPilot in Xtreme mode. The HMA template is offered separately even in Auto mode, so your HMA profile is never overwritten without confirmation. In Manual mode every step is confirmed separately.
 5. 🔄 **Reboot your device.** Until the first **Action** run the module works with the bundled Keybox and PIF.
-6. ▶️ **Run the main action:** Open your Root Manager's module list and tap **Action** on the IntegrityBox Ultimate card. Right after boot the module may still be running first-boot background tasks, so **Action** can fail to start right away and show a message that another operation is already in progress — if that happens, wait a couple of minutes and try again. Wait until it finishes: it refreshes Keybox and PIF, and on a suitable device it turns on device RKP key generation. A manual **Action** always refreshes, ignoring the timers.
-7. 🔎 **Check the result:** Open WebUI → **Module Control** → **Integrity Checker**. For the **Active Keybox** check **both axes**: the source — `ONLINE` for a cloud key or `Device RKP` for the device RKP key; and actuality — the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at once (synced from the cloud but banned by Google) — if so, refresh it via **Attestation Setup Tools** → **Keybox Loader** → **Sync & Apply Keybox**. Also confirm the page correctly shows PIF source, Target Box, TEE, and companion modules.
-8. 🧼 **Deep Clean GMS:** Go to **Reset & Cleanup** → **GMS Tools** and run **Deep GMS Wipe**. This removes old Google certification states and Google Services Framework data. Reboot when prompted. *(You will be logged out of your Google Account.)*
+6. ▶️ **Run the main action:** Open your Root Manager's module list and tap **Action** on the IntegrityBox Ultimate card. Right after boot the module may still be running first-boot background tasks, so **Action** can fail to start right away and show a message that another operation is already in progress - if that happens, wait a couple of minutes and try again. Wait until it finishes: it refreshes Keybox and PIF, and on a suitable device it turns on device RKP key generation. A manual **Action** always refreshes, ignoring the timers.
+7. 🔎 **Check the result:** Open WebUI → **Module Control** → **Integrity Checker**. For the **Active Keybox** check **both axes**: the source - `ONLINE` for a cloud key or `Device RKP` for the device RKP key; and actuality - the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at once (synced from the cloud but banned by Google) - if so, refresh it via **Attestation Setup Tools** → **Keybox Loader** → **Sync & Apply Keybox**. Also confirm the page correctly shows PIF source, Target Box, TEE, and companion modules.
+8. 🧼 **Check Play Integrity and Deep Clean GMS if needed:** Check integrity in the Play Store using steps 2-3 of "Play Store says "Device not certified"" below. If **Device integrity** or **Strong integrity** passes but the Play Store says **Device is not certified**, go to **Reset & Cleanup** → **GMS Tools** and run **Deep GMS Wipe**. This removes old Google certification states and Google Services Framework data. Reboot when prompted. *(You will be logged out of your Google Account.)* If only **Basic integrity** passes or the check fails, do not run the wipe: fix the key first using "Play Integrity fails".
 9. ✅ **Re-login & Verify:** After rebooting, open the Play Store, log back into your Google account, and check your Play Protect certification status.
-10. 🤖 **Check AutoPilot:** Go to **Module Control** → **AutoPilot Manager** — the daemon should already be running in Xtreme mode. Switch to **Keybox Only** if you prefer minimal system impact. Keep AutoPilot on so the RKP key is renewed.
-11. 🧹 **Custom ROM Props if needed:** If your device runs a custom ROM, open **Advanced System Settings** → **Spoof ROM Props** and enable **Auto Mode** — the module will scan for ROM-family traces and enable the matching cleanup cards automatically.
+10. 🤖 **Check AutoPilot:** Go to **Module Control** → **AutoPilot Manager** - the daemon should already be running in Xtreme mode. Switch to **Keybox Only** if you prefer minimal system impact. Keep AutoPilot on so the RKP key is renewed.
+11. 🧹 **Custom ROM Props if needed:** If your device runs a custom ROM, open **Advanced System Settings** → **Spoof ROM Props** and enable **Auto Mode** - the module will scan for ROM-family traces and enable the matching cleanup cards automatically.
 12. 📦 **Export a diagnostic package if needed:** If certification or apps are still unstable, open **Help & Support** → **Help Center** → **Export Report**. The archive will be saved to `/sdcard/IntegrityBox/Reports`.
 
 > [!NOTE]
-> Boot Hash and Widevine L1 are configured automatically during installation in Auto mode or confirmed manually in Manual mode. To adjust Boot Hash later — open **Advanced System Settings** → **Boot Hash Spoofer**. To re-run Widevine L1 repair — use **Attestation Setup Tools** → **Fix Widevine L1**.
+> Boot Hash and Widevine L1 are configured automatically during installation in Auto mode or confirmed manually in Manual mode. To adjust Boot Hash later - open **Advanced System Settings** → **Boot Hash Spoofer**. To re-run Widevine L1 repair - use **Attestation Setup Tools** → **Fix Widevine L1**.
 
 > [!IMPORTANT]
 > Do not tap **Action** repeatedly. Critical operations are protected from duplicate execution, but it is still better to wait for the current cycle to finish: a repeated run can be skipped as an already active operation.
@@ -405,16 +405,16 @@ If you want to use your own app list instead of the automatic template:
 
 ## 🛠️ Quick Troubleshooting
 > [!NOTE]
-> Start with the simple checks first: Keybox status, **Restart Services**, then **Deep GMS Wipe** if needed, reboot, and Play Store certification check. Use advanced Target Box modes, Boot Hash Spoofer, and Nuke only when you know which exact check is failing.
+> Start with the simple checks first: Keybox status, **Restart Services**, then **Deep GMS Wipe** if needed (only when Device or Strong integrity passes), reboot, and Play Store certification check. Use advanced Target Box modes, Boot Hash Spoofer, and Nuke only when you know which exact check is failing.
 
 ### 🧪 Play Integrity fails
 1. Open WebUI -> **Module Control** -> **Integrity Checker**.
-2. Check **Active Keybox**. These are **two independent axes** and both matter: the source — `ONLINE` for a cloud key or `Device RKP` for the device RKP key; and actuality — the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at the same time: synced from the cloud, but banned by Google and about to stop passing. `EXPIRED` means at least one certificate has run out.
+2. Check **Active Keybox**. These are **two independent axes** and both matter: the source - `ONLINE` for a cloud key or `Device RKP` for the device RKP key; and actuality - the **Actuality** line should read `ACTUAL`. A Keybox can be `ONLINE` and `REVOKED` at the same time: synced from the cloud, but banned by Google and about to stop passing. `EXPIRED` means at least one certificate has run out.
 3. If the Keybox is missing, the source is neither `ONLINE` nor `Device RKP`, or the key is flagged `REVOKED` or `EXPIRED`, open WebUI -> **Attestation Setup Tools** -> **Keybox Loader**. On a supported device, turn on **Generate device RKP key** at the top: the module obtains the phone's own key from Google. To use a pool key instead, tap **Sync & Apply Keybox**, wait for the list to refresh, then tap a fresh Keybox carrying both the `PROVIDER` badge and the `ACTUAL` tag, and confirm loading it into **SLOT 1** *(the primary slot; extra slots appear only when the backend supports them)*. Choosing a pool key turns RKP generation off. If the cloud list does not appear, check your internet connection and GitHub access. If sync is still unavailable, place your own XML Keybox in `/sdcard/Download` or `/sdcard/Documents`, tap the refresh button, and load the detected `LOCAL` Keybox into **SLOT 1**.
-4. After updating the Keybox, run WebUI -> **Reset & Cleanup** -> **GMS Tools** -> **Deep GMS Wipe**, reboot, and check the Play Store again.
+4. After updating the Keybox, tap WebUI -> **Reset & Cleanup** -> **GMS Tools** -> **Restart Services**, then check integrity in the Play Store using steps 2-3 of the next section. Run **Deep GMS Wipe** only when **Device integrity** or **Strong integrity** passes.
 
 ### 🛒 Play Store says "Device not certified"
-1. Make sure Play Integrity already passes in **Integrity Checker**.
+1. Make sure **Active Keybox** in **Integrity Checker** is tagged `ACTUAL`.
 2. Enable hidden Play Store developer options: open **Play Store** -> tap your profile avatar in the top-right corner -> **Settings** -> **About** -> tap **Play Store version** 7 times until developer mode is enabled.
 3. Check the integrity verdict: go back to Play Store **Settings** -> **General** -> **Developer options** -> in the **Play Integrity** section, tap **Check integrity**.
 4. The result should show a passing integrity verdict. For normal Play Store certification, **Device integrity** / `MEETS_DEVICE_INTEGRITY` should pass; for Google Wallet and strict banking apps, **Strong integrity** / `MEETS_STRONG_INTEGRITY` is usually required.
@@ -425,8 +425,8 @@ If you want to use your own app list instead of the automatic template:
 ### 💳 Google Wallet / GPay fails
 1. First run the built-in Play Integrity check through the Play Store: **Play Store** -> profile avatar -> **Settings** -> **General** -> **Developer options** -> **Play Integrity** -> **Check integrity**. If **Developer options** is not visible, enable it using the previous scenario.
 2. Google Wallet usually requires **Strong integrity** / `MEETS_STRONG_INTEGRITY`. If only **Device integrity** passes, the Play Store may be certified, but Wallet can still reject payments.
-3. **If you have just changed spoofing settings** (profile, Fingerprint, **Advanced Spoofing** toggles), start with the light step: WebUI -> **Reset & Cleanup** -> **GMS Tools** -> the **Restart Services** button. It drops the DroidGuard verdict cache that keeps Google Play Services handing Wallet the **old** check result even though the settings already changed. Your cards and account are untouched. This is often enough — try adding a card right after.
-4. If **Strong integrity** does not pass, go back to **Play Integrity fails**: check **Active Keybox** (both the `ONLINE` or `Device RKP` source and the `ACTUAL` tag), refresh the Keybox through **Keybox Loader**, then run **Deep GMS Wipe** and reboot.
+3. **If you have just changed spoofing settings** (profile, Fingerprint, **Advanced Spoofing** toggles), start with the light step: WebUI -> **Reset & Cleanup** -> **GMS Tools** -> the **Restart Services** button. It drops the DroidGuard verdict cache that keeps Google Play Services handing Wallet the **old** check result even though the settings already changed. Your cards and account are untouched. This is often enough - try adding a card right after.
+4. If **Strong integrity** does not pass, go back to **Play Integrity fails**: check **Active Keybox** (both the `ONLINE` or `Device RKP` source and the `ACTUAL` tag), refresh the Keybox through **Keybox Loader**, then tap **Restart Services** in **GMS Tools** and repeat the integrity check.
 5. If **Strong integrity** passes but Wallet still fails, open WebUI -> **Reset & Cleanup** -> **GMS Tools** -> the **Clear Wallet Data** button. It wipes Wallet's local state that cached a previous security failure and drops the services cache as well. You will **not** be signed out of your Google account, but you will most likely need to add your cards again.
 6. Reboot, open Google Wallet, add your cards again if needed, and test contactless payment.
 
