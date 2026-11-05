@@ -231,7 +231,6 @@
 | Reset Props | ADB, debug/dev state, secure mode, bootloader/Verified Boot, build type, OEM unlock, emulator flags. | Когда нужно подставить безопасные user/locked/release-like значения вместо опасных текущих значений. |
 | Duck Detector Props | Небольшой набор props, которые часто проверяют строгие native-детекторы. | Когда нужно удалить сами ключи из текущего property space, а не подменить их значения. |
 | Delete Props | ROM-брендовые свойства, Pixel/EliteProps/PIF leftovers и другие следы старых spoof-модулей. | Когда нужно удалить сам факт наличия кастомного/спуфинг-свойства из текущего property space. |
-| Nuke Trash | `*.odex`, `*.vdex`, `base.odex` в `/data/app`. | Когда детектор цепляется за старые odex/vdex-артефакты после модулей или обновлений приложений. |
 
 #### Reset Props
 
@@ -254,7 +253,6 @@
 | User Build | `ro.build.type=user`, `ro.build.tags=release-keys` | Подставляет признаки обычной release-сборки. |
 | OEM Lock | `ro.oem_unlock_supported=0`, `sys.oem_unlock_allowed=0` | Скрывает поддержку/разрешение OEM unlock. |
 | No Emulator | `ro.kernel.qemu=0`, `ro.boot.qemu=0`, `ro.hardware.virtual_device=0` | Убирает базовые признаки emulator/virtual device. |
-| Nuke Trash | Удаление `*.odex`, `*.vdex`, `base.odex` в `/data/app` | Очищает старые артефакты оптимизации приложений; это не `getprop`. |
 
 #### Duck Detector Props
 
