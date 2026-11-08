@@ -7,8 +7,8 @@
 # 3. SHA256
 
 ZygiskNext.zip
-https://github.com/LSPosed/ZygiskNext/releases/download/v1.5.2/Zygisk-Next-1.5.2-864-a4a72ce-release.zip
-ce50b13fecb9e4456db69ef17b715f7cfbc094004dd9f30f7d6348dfab619a96
+https://github.com/LSPosed/ZygiskNext/releases/download/v1.5.3/Zygisk-Next-1.5.3-880-22a1bf5-release.zip
+186a0a26c9fcb895af1954b42de831433c23d72d1bd0758b986069154359db67
 
 # TrickyStore backend — обе сборки имеют module id "tricky_store",
 # поэтому ставить нужно ТОЛЬКО ОДНУ из них:
@@ -27,8 +27,8 @@ https://github.com/vvb2060/KeyAttestation/releases/download/v1.8.4/KeyAttestatio
 e22ae305deca589fc9af2dc8940f5c62bac7120bed817f80da1f345a9ec69897
 
 Duck_Detector.apk
-https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly-2026-11-04-8b365ba9/Duck.Detector-nightly-2026-11-04-8b365ba9.apk
-322207a5735a08fdf9843ca5e4bc28069a96252ff580dc118c694f0eb847e428
+https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly-2026-11-07-d60597ca/Duck.Detector-nightly-2026-11-07-d60597ca.apk
+725bc4d75f57d79147c8795465b9e26efafe1826020d543f006ce74c2e13f46a
 
 Native_Root_Detector.apk
 https://github.com/reveny/Android-Native-Root-Detector/releases/download/v7.7.0/native-root-detector-v7.7.0.apk
@@ -40,7 +40,7 @@ https://github.com/Xposed-Modules-Repo/ru.mike.updatelocker/releases/download/20
 
 HMA_Config.json
 https://raw.githubusercontent.com/flexgav/IntegrityBox-Ultimate/main/hidemyapplist/config.json
-e579a2545960414ba86aab9dda1a9f8a7227c1dc5747b00be933673d5740976d
+5e53193f0f8cc080c45eb97e4f40419762119c4dfc113ef19dbf636e8160cca0
 
 HMA_OSS.zip
 https://github.com/frknkrc44/HMA-OSS/releases/download/oss-175/HMA-OSS-ZYGISK-oss-175-release.zip
