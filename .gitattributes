@@ -1,0 +1,3 @@
+# The key seed is hashed byte for byte: the shift that decodes fg/ comes from its
+# SHA-256, so its line endings must never be converted on checkout.
+assets/stthm -text

@@ -5896,6 +5896,39 @@
 			"extraAppList": [],
 			"extraOppositeAppList": []
 		},
+		"com.runpay.emoney": {
+			"useWhitelist": false,
+			"excludeSystemApps": true,
+			"hideInstallationSource": true,
+			"hideSystemInstallationSource": true,
+			"excludeTargetInstallationSource": false,
+			"invertActivityLaunchProtection": false,
+			"excludeVoldIsolation": false,
+			"restrictedZygotePermissions": [
+				1032
+			],
+			"applyTemplates": [
+				"FlexGAV Blacklist 5.5"
+			],
+			"applyPresets": [
+				"custom_rom",
+				"detector_apps",
+				"root_apps",
+				"shizuku_dhizuku",
+				"sus_apps",
+				"xposed"
+			],
+			"applySettingTemplates": [
+				"FlexGAV Settings 5.5"
+			],
+			"applySettingsPresets": [
+				"accessibility",
+				"dev_options",
+				"input_method"
+			],
+			"extraAppList": [],
+			"extraOppositeAppList": []
+		},
 		"com.verimi": {
 			"useWhitelist": false,
 			"excludeSystemApps": true,
