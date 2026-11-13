@@ -12,6 +12,8 @@ private property areas + companion protocol + JNI inject of the spoofing dex).
 - `src/dex_payload.cpp` — optional Provider/Signature payload integration.
 - `src/property_virtualizer.cpp` — property-area installer adapted from
   [KOWX712/PlayIntegrityFix inject_s v4.9](https://github.com/KOWX712/PlayIntegrityFix/tree/1138c6f3cebb).
+- `src/property_area.cpp` - Bionic property formats: context lookup in
+  `property_info` and trie insertion, following AOSP bionic and libpropertyinfoparser.
 - `include/property_virtualizer.hpp`, `include/logging.hpp` — installer result
   contract and the shared runtime logging gate.
 - `include/zygisk.hpp` — Zygisk API header.
@@ -48,6 +50,13 @@ See `zygisk-buildkit/README.md` for prerequisites and details.
   The installer validates the area ABI and file identity, restores read-only
   protection, verifies values and rolls back failures. Existing private changes
   from other backends are preserved. A failed rollback ends only the unsafe child.
+- **Missing properties:** in DroidGuard only, `ro.board.first_api_level` and
+  `ro.product.first_api_level` from the profile are added when the device lacks
+  them (PlayIntegrityFork a645788 creates the first one globally instead). They
+  go into the private copy of their context's area, so other processes and
+  per-app targets never see them. Bionic must then find them with the profile
+  value; otherwise only this step rolls back. No accessible area or space leaves
+  them absent (`unavailable`) without touching the installed replacements.
 - **Long values:** read-only replacements use Bionic long encoding and available
   private-area space. Long mutable values or insufficient space reject preparation
   without partial application. Logcat remains silent unless verboseLogs is enabled.

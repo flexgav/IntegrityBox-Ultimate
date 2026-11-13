@@ -12,8 +12,10 @@ https://github.com/eltavine/Duck-ToolBox/pull/19.
   queues the methods the device probe reports as eligible (V2, AIDL V1,
   native V1) and keeps a structured error for each attempt. It stops after a
   local publication failure or an unknown server submission, reports device
-  refusals separately from transport/network errors and strips the generated
-  XML from JSON output.
+  refusals separately from Google/network failures, busy hardware and uncertain
+  results. System RPC absence excludes only AIDL V1. Results include method
+  availability, classified attempts and whether all eligible methods were
+  checked. Generated XML is stripped from JSON output.
 - `Cargo.toml`, `Cargo.lock` - pinned dependencies. Keep the lock file with
   the source.
 
@@ -37,7 +39,8 @@ cargo build --locked --release --target aarch64-linux-android
 ```
 
 The binary lands in `target/aarch64-linux-android/release/ib-rkp`. Host unit
-tests: `cargo test --locked`.
+tests: `cargo test --locked`. The build kit includes this canonical source
+instead of maintaining a second copy.
 
 ## Licenses
 

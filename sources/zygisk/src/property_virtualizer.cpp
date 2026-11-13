@@ -3,6 +3,7 @@
 #include "property_virtualizer.hpp"
 
 #include "logging.hpp"
+#include "property_area.hpp"
 #include <climits>
 #include <fcntl.h>
 #include <linux/futex.h>
@@ -27,6 +28,8 @@ namespace property_virtualizer {
 namespace {
 
 constexpr std::string_view kPropertyDirectory = "/dev/__properties__/";
+constexpr char kPropertyInfoPath[] = "/dev/__properties__/property_info";
+constexpr off_t kMaxPropertyInfoSize = 8 << 20;
 constexpr uint32_t kPropertyAreaMagic = 0x504f5250;
 constexpr uint32_t kPropertyAreaVersion = 0xfc6ed0ab;
 constexpr uint32_t kLongPropertyFlag = 1U << 16;
@@ -507,6 +510,43 @@ bool rollback(std::vector<Mapping> &mappings) {
     return ok;
 }
 
+// The property-name-to-context map bionic uses to pick a property area.
+bool readPropertyInfo(std::string &out) {
+    const int fd = open(kPropertyInfoPath, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+    if (fd < 0) return false;
+    struct stat st = {};
+    bool ok = fstat(fd, &st) == 0 && S_ISREG(st.st_mode) && st.st_size > 0 &&
+              st.st_size <= kMaxPropertyInfoSize;
+    if (ok) out.resize(static_cast<size_t>(st.st_size));
+    for (size_t done = 0; ok && done < out.size();) {
+        const ssize_t got = pread(fd, out.data() + done, out.size() - done, static_cast<off_t>(done));
+        if (got > 0) done += static_cast<size_t>(got);
+        else if (got < 0 && errno == EINTR) continue;
+        else ok = false;
+    }
+    close(fd);
+    return ok;
+}
+
+// Bionic must now find the property in the private copy with the rule value.
+bool verifyAddition(const Mapping &mapping, const std::string &name, const std::string &value) {
+    const prop_info *info = __system_property_find(name.c_str());
+    const auto address = reinterpret_cast<uintptr_t>(info);
+    if (!info || address < mapping.start || address >= mapping.end) return false;
+    struct Verification {
+        const std::string &name;
+        const std::string &value;
+        bool matches = false;
+    } check{name, value};
+    __system_property_read_callback(info, [](void *cookie, const char *readName, const char *readValue, uint32_t) {
+        auto &check = *static_cast<Verification *>(cookie);
+        check.matches = readName && readValue && check.name == readName && check.value == readValue;
+    }, &check);
+    char text[PROP_VALUE_MAX] = {};
+    return check.matches && __system_property_get(name.c_str(), text) == static_cast<int>(value.size()) &&
+           value == text;
+}
+
 } // namespace
 
 Result install(const std::unordered_map<std::string, std::string> &exact,
@@ -550,6 +590,98 @@ Result install(const std::unordered_map<std::string, std::string> &exact,
     return finish(Status::Applied);
 }
 
+Result addMissing(const std::unordered_map<std::string, std::string> &exact,
+                  std::span<const char *const> creatable) {
+    struct Addition {
+        std::string name;
+        std::string value;
+        Mapping *mapping = nullptr;
+    };
+    std::vector<Addition> missing;
+    for (const char *name : creatable) {
+        const auto rule = exact.find(name);
+        if (rule == exact.end() || rule->second.empty() || __system_property_find(name) != nullptr) continue;
+        if (rule->second.size() >= PROP_VALUE_MAX || rule->second.find('\0') != std::string::npos) {
+            LOGE("unsupported value for missing property %s", name);
+            return {Status::UnsupportedValue, 1};
+        }
+        missing.push_back({name, rule->second});
+    }
+    if (missing.empty()) return {Status::NoMatches};
+
+    std::string propertyInfo;
+    if (!readPropertyInfo(propertyInfo)) {
+        LOGE("[PROP-VIRT] cannot read %s", kPropertyInfoPath);
+        return {Status::InvalidLayout, missing.size()};
+    }
+    std::vector<Mapping> mappings;
+    if (__system_property_foreach(warmupCallback, nullptr) != 0 || !parseMappings(mappings))
+        return {Status::InvalidLayout, missing.size()};
+
+    // Place each name in the area of its context, while that area has room.
+    std::vector<Addition> additions;
+    std::vector<Mapping *> affected;
+    std::vector<size_t> planned(mappings.size(), 0);
+    for (auto &addition : missing) {
+        const auto context = property_area::contextFor(propertyInfo, addition.name);
+        if (!context) {
+            LOGE("no property context for %s", addition.name.c_str());
+            continue;
+        }
+        const auto path = std::string(kPropertyDirectory) + *context;
+        const auto found = std::find_if(mappings.begin(), mappings.end(),
+                                        [&](const Mapping &mapping) { return mapping.path == path; });
+        if (found == mappings.end()) {
+            LOGE("no accessible property area %s for %s", context->c_str(), addition.name.c_str());
+            continue;
+        }
+        const size_t length = found->end - found->start;
+        const auto bytes = property_area::insertionSize(reinterpret_cast<const char *>(found->start),
+                                                        length, addition.name);
+        if (!bytes) {
+            LOGE("invalid property area %s for %s", context->c_str(), addition.name.c_str());
+            return {Status::InvalidLayout, missing.size()};
+        }
+        if (*bytes == 0) continue;
+        auto &reserved = planned[size_t(found - mappings.begin())];
+        const size_t available = length - sizeof(PropertyAreaHeader) - found->bytesUsed;
+        if (*bytes > available - std::min(available, reserved)) {
+            LOGE("no free space in %s for %s", context->c_str(), addition.name.c_str());
+            continue;
+        }
+        reserved += *bytes;
+        addition.mapping = &*found;
+        additions.push_back(addition);
+        if (std::find(affected.begin(), affected.end(), addition.mapping) == affected.end())
+            affected.push_back(addition.mapping);
+    }
+    if (additions.empty()) return {Status::Unavailable, missing.size()};
+
+    auto finish = [&](Status status) -> Result {
+        if (status != Status::Applied && !rollback(mappings)) status = Status::RollbackFailed;
+        cleanup(mappings);
+        return {status, missing.size(), status == Status::Applied ? additions.size() : 0};
+    };
+    for (Mapping *mapping : affected)
+        if (!preflightOpen(*mapping)) return finish(Status::MappingFailed);
+    // No logging from here until protection is restored: it may read properties.
+    for (Mapping *mapping : affected)
+        if (!remapPrivate(*mapping)) return finish(Status::MappingFailed);
+    for (const auto &addition : additions) {
+        const Mapping &mapping = *addition.mapping;
+        if (!property_area::insert(reinterpret_cast<char *>(mapping.start), mapping.end - mapping.start,
+                                   addition.name, addition.value)) return finish(Status::InvalidLayout);
+    }
+    for (Mapping *mapping : affected)
+        if (mprotect(reinterpret_cast<void *>(mapping->start), mapping->end - mapping->start,
+                     mapping->prot) != 0) return finish(Status::MappingFailed);
+    for (const auto &addition : additions)
+        if (!verifyAddition(*addition.mapping, addition.name, addition.value))
+            return finish(Status::VerificationFailed);
+    if (!verifyMappingsIdentity(affected)) return finish(Status::VerificationFailed);
+    return finish(Status::Applied);
+}
+
 const char *statusName(Status status) {
     switch (status) {
         case Status::Applied: return "applied";
@@ -559,6 +691,7 @@ const char *statusName(Status status) {
         case Status::MappingFailed: return "mapping_failed";
         case Status::VerificationFailed: return "verification_failed";
         case Status::RollbackFailed: return "rollback_failed";
+        case Status::Unavailable: return "unavailable";
     }
     return "unknown";
 }

@@ -17,6 +17,11 @@ constexpr char kDexPath[] = "/data/adb/modules/playintegrityfix/classes.dex";
 constexpr char kAppsPath[] = "/data/adb/modules/playintegrityfix/spfapps.list";
 // Neutral boot-time gate; membership and the saved flag are rechecked by root.
 constexpr char kAppsGate[] = "sys.spfapps.cfg";
+// Profile properties a device may lack while every Pixel defines them. Without
+// the property its profile value cannot reach DroidGuard (PlayIntegrityFork
+// a645788 measured far fewer usable Canary profiles). They are added only to
+// DroidGuard's private property view, never globally or for per-app targets.
+constexpr const char *kCreatableProperties[] = {"ro.board.first_api_level", "ro.product.first_api_level"};
 
 std::string_view view(const std::vector<char> &bytes) { return {bytes.data(), bytes.size()}; }
 
@@ -76,11 +81,21 @@ public:
         if (config_.needsDex(role_)) dex_ = std::move(payload.dex);
 
         if (config_.props && (role_ == runtime::Role::DroidGuard || role_ == runtime::Role::App)) {
-            const auto result = property_virtualizer::install(config_.exactProperties(), config_.suffixProperties());
-            if (result.status == property_virtualizer::Status::RollbackFailed) _exit(1);
-            if (result.status == property_virtualizer::Status::Applied || result.status == property_virtualizer::Status::NoMatches)
+            using property_virtualizer::Status;
+            const auto exact = config_.exactProperties();
+            const auto result = property_virtualizer::install(exact, config_.suffixProperties());
+            if (result.status == Status::RollbackFailed) _exit(1);
+            const bool installed = result.status == Status::Applied || result.status == Status::NoMatches;
+            if (installed)
                 LOGI("properties status=%s matched=%zu applied=%zu", property_virtualizer::statusName(result.status), result.matched, result.applied);
             else LOGE("properties status=%s matched=%zu applied=%zu", property_virtualizer::statusName(result.status), result.matched, result.applied);
+            if (installed && role_ == runtime::Role::DroidGuard) {
+                const auto added = property_virtualizer::addMissing(exact, kCreatableProperties);
+                if (added.status == Status::RollbackFailed) _exit(1);
+                if (added.status == Status::Applied || added.status == Status::NoMatches)
+                    LOGI("missing properties status=%s missing=%zu added=%zu", property_virtualizer::statusName(added.status), added.matched, added.applied);
+                else LOGE("missing properties status=%s missing=%zu added=%zu", property_virtualizer::statusName(added.status), added.matched, added.applied);
+            }
         }
         ready_ = true;
     }

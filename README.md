@@ -85,7 +85,7 @@
 
 3. **WebUI.** Для открытия панели управления установите [**MMRL**](https://github.com/MMRLApp/MMRL/releases/latest), [**WebUI X Portable**](https://github.com/MMRLApp/WebUI-X-Portable/releases/latest) или используйте встроенную поддержку WebUI в root-менеджере.
 
-   Если WebUI не открывается напрямую, заранее установите [**KsuWebUIStandalone**](https://github.com/KOWX712/KsuWebUIStandalone/releases/latest) вручную как fallback-вариант. После первого входа в WebUI его APK также можно скачать через Integrity Downloader.
+   Если WebUI не открывается напрямую, заранее установите [**KsuWebUIStandalone**](https://github.com/KOWX712/KsuWebUIStandalone/releases/latest) вручную как fallback-вариант. После первого входа в WebUI его APK также можно скачать через Integrity Downloader. На Magisk после ручного Action модуль сам открывает WebUI в KsuWebUIStandalone или WebUI X, если одно из них установлено.
 
 4. **Метамодули монтирования.** IntegrityBox Ultimate сам по себе не требует отдельный metamodule ради своей работы. Он нужен только если у вас есть другие systemless-модули, которые реально монтируют файлы в `/system`, `/vendor`, `/product`, `/system_ext`, `/odm` и похожие разделы.
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -10,7 +11,7 @@ namespace property_virtualizer {
 
 enum class Status {
     Applied, NoMatches, InvalidLayout, UnsupportedValue, MappingFailed,
-    VerificationFailed, RollbackFailed
+    VerificationFailed, RollbackFailed, Unavailable
 };
 
 struct Result {
@@ -25,6 +26,13 @@ struct Result {
 // RollbackFailed is reported separately and must never trigger a second engine.
 Result install(const std::unordered_map<std::string, std::string> &exact,
                const std::vector<std::pair<std::string, std::string>> &suffixes);
+// Adds the listed names that the device does not define, with their exact rule
+// values, to this process's private copy of their property area only. Call it
+// after install(); it keeps that result and rolls back only its own changes.
+// matched counts the missing names, applied the added ones. Unavailable: no
+// accessible area for any of them.
+Result addMissing(const std::unordered_map<std::string, std::string> &exact,
+                  std::span<const char *const> creatable);
 const char *statusName(Status status);
 
 } // namespace property_virtualizer

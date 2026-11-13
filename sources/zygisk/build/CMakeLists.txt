@@ -11,6 +11,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
     build_fields.cpp
     dex_payload.cpp
     property_virtualizer.cpp
+    property_area.cpp
     local_cxa_atexit_finalize_impl/atexit.cpp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE log)
