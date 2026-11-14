@@ -1,3 +1,18 @@
+> Release Date: 14/11/2026
+
+#### 🚀 IntegrityBox Ultimate v43.7
+
+HMA pipeline update: the module works only with the HMA apps themselves, imports the template into every installed HMA, HMAL and HMA-OSS and shows the import progress for each app.
+
+- **HMA template for every installed app**: with several HMA, HMAL or HMA-OSS installed, each one gets the template in the format of its version, and the app choice dialog is gone. When only some got it, the installer reports that separately and the others keep the template.
+- **Import progress in the WebUI**: the Inject HMA Template tile opens a step window: the template is downloaded from the server first, then each app gets it in its own row with its result. The icon and color of the window show the overall result. A manual import is offered only when no app got the template, and with no HMA installed the tile says so right away.
+- **Template without network**: the template downloaded from the server now replaces the module's own copy, so an import without network applies the latest downloaded template, and after a module update the one from its archive.
+- **No framework check**: the module no longer looks for LSPosed or the HMA-OSS Zygisk module before the import and works only with the HMA app itself. That check used to stop the import when the framework module had a name it did not expect.
+- **HMA-OSS-run**: this LSPosed build of HMA-OSS with its own version numbers did not get the template: the module picked its config location by version number and looked in the service storage. The location now follows the app build.
+- **Clear reason for HMA-OSS**: when the HMA-OSS service has not set up its storage yet, the installer and the WebUI suggest enabling the HMA-OSS module and rebooting.
+- **And other cosmetic adjustments.**
+- **Upgrade notes**: with several HMA apps installed, every one now gets the template.
+
 > Release Date: 13/11/2026
 
 #### 🚀 IntegrityBox Ultimate v43.6
