@@ -2,7 +2,13 @@
     {
         "file":  "fg1.json",
         "status":  3,
-        "updated":  "2026-11-24T08:48:16Z",
+        "updated":  "2026-11-28T09:15:29Z",
+        "hash":  "4b28c936862c6e3f1df2ea8be4b091cf6eee3bb290e69327cb8e7323423899b9"
+    },
+    {
+        "file":  "fg2.json",
+        "status":  3,
+        "updated":  "2026-11-28T09:15:29Z",
         "hash":  "c13e4138038ff38a620e784d52e3dcb23f8fdedbdf5e96b9c9ab84e57f55b088"
     }
 ]
